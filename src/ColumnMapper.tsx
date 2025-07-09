@@ -87,8 +87,8 @@ const ColumnMapper: React.FC = () => {
       {Object.keys(mappedColumns).filter(field => field !== 'firstName' && field !== 'lastName' && field !== 'email').map(field => (
         <React.Fragment key={field}>
           <FormControl fullWidth sx={{ marginTop: '10px', width: '100%' }}>
-            <InputLabel>{field.charAt(0).toUpperCase() + field.slice(1)}</InputLabel>
-            <Select value={mappedColumns[field] || ''} onChange={(e) => handleChange(field, e.target.value)}>
+            <InputLabel id={`${field}-label`}>{field.charAt(0).toUpperCase() + field.slice(1)}</InputLabel>
+            <Select labelId={`${field}-label`} value={mappedColumns[field] || ''} onChange={(e) => handleChange(field, e.target.value)} label={field.charAt(0).toUpperCase() + field.slice(1)}>
               {headers.map(header => (
                 <MenuItem key={header} value={header}>{header}</MenuItem>
               ))}
@@ -98,8 +98,8 @@ const ColumnMapper: React.FC = () => {
           {field === 'gender' && mappedColumns.gender && (
             <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
               <FormControl fullWidth>
-                <InputLabel>Male</InputLabel>
-                <Select multiple value={maleValues} onChange={(e) => setMaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')}>
+                <InputLabel id="male-values-label">Male</InputLabel>
+                <Select multiple value={maleValues} onChange={(e) => setMaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="male-values-label" label="Male">
                   {uniqueValues[mappedColumns.gender]?.map(value => (
                     <MenuItem key={value} value={value}>
                       <Checkbox checked={maleValues.indexOf(value) > -1} />
@@ -109,8 +109,8 @@ const ColumnMapper: React.FC = () => {
                 </Select>
               </FormControl>
               <FormControl fullWidth sx={{ marginTop: '10px' }}>
-                <InputLabel>Female</InputLabel>
-                <Select multiple value={femaleValues} onChange={(e) => setFemaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')}>
+                <InputLabel id="female-values-label">Female</InputLabel>
+                <Select multiple value={femaleValues} onChange={(e) => setFemaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="female-values-label" label="Female">
                   {uniqueValues[mappedColumns.gender]?.map(value => (
                     <MenuItem key={value} value={value}>
                       <Checkbox checked={femaleValues.indexOf(value) > -1} />
@@ -130,10 +130,12 @@ const ColumnMapper: React.FC = () => {
                   <TextField label="From" value={range.from} onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].from = e.target.value; setTargetAgeRanges(newRanges); }} />
                   <TextField label="To" value={range.to} onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].to = e.target.value; setTargetAgeRanges(newRanges); }} />
                   <FormControl sx={{ minWidth: 120 }}>
-                    <InputLabel>Name</InputLabel>
+                    <InputLabel id="target-age-name-label">Name</InputLabel>
                     <Select
+                      labelId="target-age-name-label"
                       value={range.name}
                       onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].name = e.target.value; setTargetAgeRanges(newRanges); }}
+                      label="Name"
                     >
                       {uniqueValues[mappedColumns.targetAge]?.map(value => (
                         <MenuItem key={value} value={value}>{value}</MenuItem>
@@ -149,8 +151,8 @@ const ColumnMapper: React.FC = () => {
           {field === 'isGroupLeader' && mappedColumns.isGroupLeader && (
             <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
               <FormControl fullWidth>
-                <InputLabel>Group Leader Values</InputLabel>
-                <Select multiple value={groupLeaderValues} onChange={(e) => setGroupLeaderValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')}>
+                <InputLabel id="group-leader-values-label">Group Leader Values</InputLabel>
+                <Select multiple value={groupLeaderValues} onChange={(e) => setGroupLeaderValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="group-leader-values-label" label="Group Leader Values">
                   {uniqueValues[mappedColumns.isGroupLeader]?.map(value => (
                     <MenuItem key={value} value={value}>
                       <Checkbox checked={groupLeaderValues.indexOf(value) > -1} />

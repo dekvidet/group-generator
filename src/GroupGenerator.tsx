@@ -267,8 +267,8 @@ const GroupGenerator: React.FC = () => {
       <TextField label="Minimum number of group leaders in a group" type="number" fullWidth sx={{ marginTop: '10px' }} value={groupSettings.minLeaders} onChange={(e) => handleChange('minLeaders', parseInt(e.target.value))} />
       <TextField label="Number of rounds" type="number" fullWidth sx={{ marginTop: '10px' }} value={groupSettings.rounds} onChange={(e) => handleChange('rounds', parseInt(e.target.value))} />
       <FormControl fullWidth sx={{ marginTop: '10px' }}>
-        <InputLabel>Shuffle Policy</InputLabel>
-        <Select value={groupSettings.shufflePolicy} onChange={(e) => handleChange('shufflePolicy', e.target.value)}>
+        <InputLabel id="shuffle-policy-label">Shuffle Policy</InputLabel>
+        <Select labelId="shuffle-policy-label" value={groupSettings.shufflePolicy} onChange={(e) => handleChange('shufflePolicy', e.target.value)} label="Shuffle Policy">
           <MenuItem value="unique">Unique</MenuItem>
           <MenuItem value="random">Random</MenuItem>
         </Select>
@@ -276,11 +276,13 @@ const GroupGenerator: React.FC = () => {
       <FormControlLabel control={<Checkbox checked={groupSettings.balanceGenders} onChange={(e) => handleChange('balanceGenders', e.target.checked)} />} label="Balance genders" />
       <FormControlLabel control={<Checkbox checked={groupSettings.splitByTargetAge} onChange={(e) => handleChange('splitByTargetAge', e.target.checked)} />} label="Split by target age" />
       <FormControl fullWidth sx={{ marginTop: '10px' }}>
-        <InputLabel>Columns to Display</InputLabel>
+        <InputLabel id="columns-to-display-label">Columns to Display</InputLabel>
         <Select
           multiple
+          labelId="columns-to-display-label"
           value={displayColumns}
           onChange={(e) => setDisplayColumns(e.target.value as string[])}
+          label="Columns to Display"
           renderValue={(selected) => (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {(selected as string[]).map((value) => (
