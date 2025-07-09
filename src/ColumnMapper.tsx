@@ -5,7 +5,7 @@ import { Box, FormControl, InputLabel, Select, MenuItem, Typography, TextField, 
 import Papa from 'papaparse';
 
 const ColumnMapper: React.FC = () => {
-  const { headers, uniqueValues, mappedColumns, setMappedColumns, setProcessedData, setParticipantRatios, setAgeGroups, file, setMaleValues, setFemaleValues, setGroupLeaderValues, setTargetAgeRanges, maleValues, femaleValues, groupLeaderValues, targetAgeRanges } = useStore();
+  const { headers, uniqueValues, mappedColumns, setMappedColumns, setProcessedData, setParticipantRatios, setAgeGroups, file, setMaleValues, setFemaleValues, setGroupLeaderValues, setTargetAgeRanges, maleValues, femaleValues, groupLeaderValues, targetAgeRanges, displayColumns, setDisplayColumns } = useStore();
 
   const handleChange = (field: string, value: any) => {
     setMappedColumns({ [field]: value });
@@ -18,6 +18,11 @@ const ColumnMapper: React.FC = () => {
         complete: (results) => {
           const data = (results.data as any[]).map(row => {
             const newRow: any = {};
+            // Include all original CSV headers in newRow
+            headers.forEach(header => {
+              newRow[header] = row[header];
+            });
+            // Then, apply the specific mappings for internal fields
             Object.keys(mappedColumns).forEach(field => {
               const csvHeader = mappedColumns[field];
               if (csvHeader) {
@@ -79,7 +84,7 @@ const ColumnMapper: React.FC = () => {
   return (
     <Box sx={{ marginTop: '20px' }}>
       <Typography variant="h6">Map Columns</Typography>
-      {Object.keys(mappedColumns).map(field => (
+      {Object.keys(mappedColumns).filter(field => field !== 'firstName' && field !== 'lastName' && field !== 'email').map(field => (
         <React.Fragment key={field}>
           <FormControl fullWidth sx={{ marginTop: '10px' }}>
             <InputLabel>{field.charAt(0).toUpperCase() + field.slice(1)}</InputLabel>
@@ -158,6 +163,23 @@ const ColumnMapper: React.FC = () => {
           )}
         </React.Fragment>
       ))}
+
+      <FormControl fullWidth sx={{ marginTop: '20px' }}>
+        <InputLabel>Columns to Display</InputLabel>
+        <Select
+          multiple
+          value={displayColumns}
+          onChange={(e) => setDisplayColumns(e.target.value as string[])}
+          renderValue={(selected) => (selected as string[]).join(', ')}
+        >
+          {headers.map((header) => (
+            <MenuItem key={header} value={header}>
+              <Checkbox checked={displayColumns.indexOf(header) > -1} />
+              <ListItemText primary={header} />
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
       <Button variant="contained" sx={{ marginTop: '20px' }} onClick={handleProcess}>Process</Button>
     </Box>

@@ -5,7 +5,7 @@ import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, 
 import * as XLSX from 'xlsx';
 
 const GroupGenerator: React.FC = () => {
-  const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, groupLeaderValues, maleValues, femaleValues, targetAgeRanges, participantPairs, setParticipantPairs, generatedGroups } = useStore();
+  const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, groupLeaderValues, maleValues, femaleValues, targetAgeRanges, participantPairs, setParticipantPairs, generatedGroups, displayColumns } = useStore();
 
   const handleChange = (field: string, value: any) => {
     setGroupSettings({ [field]: value });
@@ -215,16 +215,19 @@ const GroupGenerator: React.FC = () => {
     const wb = XLSX.utils.book_new();
 
     generatedGroups.forEach((round, roundIndex) => {
-      const ws_data: any[][] = [['ID', 'Full Name']];
+      const ws_data: any[][] = [[]];
+      displayColumns.forEach(col => ws_data[0].push(col.charAt(0).toUpperCase() + col.slice(1)));
+      ws_data[0].push('Group Leader');
+
       const roundParticipants = new Map();
 
       round.forEach((group: any) => {
         group.participants.forEach((participant: any) => {
           if (!roundParticipants.has(participant.id)) {
             roundParticipants.set(participant.id, {
-              fullName: `${participant.firstName} ${participant.lastName}`,
               isLeader: groupLeaderValues.includes(participant.isGroupLeader) ? 'X' : '',
-              groups: {}
+              groups: {},
+              data: participant
             });
           }
           roundParticipants.get(participant.id).groups[roundIndex] = group.id;
@@ -235,14 +238,14 @@ const GroupGenerator: React.FC = () => {
       for (let i = 0; i <= maxRound; i++) {
         ws_data[0].push(`Round ${i + 1}`);
       }
-      ws_data[0].push('Group Leader');
 
       roundParticipants.forEach((value, key) => {
-        const row = [key, value.fullName];
+        const row: any[] = [];
+        displayColumns.forEach(col => row.push(value.data[col]));
+        row.push(value.isLeader);
         for (let i = 0; i <= maxRound; i++) {
           row.push(value.groups[i] || '');
         }
-        row.push(value.isLeader);
         ws_data.push(row);
       });
 

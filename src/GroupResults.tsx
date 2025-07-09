@@ -3,7 +3,7 @@ import { useStore } from './store';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 const GroupResults: React.FC = () => {
-  const { generatedGroups, groupLeaderValues, groupSettings } = useStore();
+  const { generatedGroups, groupLeaderValues, groupSettings, displayColumns } = useStore();
 
   const getAverageAge = (group: any) => {
     if (group.participants.length === 0) return 0;
@@ -28,12 +28,9 @@ const GroupResults: React.FC = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>ID</TableCell>
-                      <TableCell>First Name</TableCell>
-                      <TableCell>Last Name</TableCell>
-                      <TableCell>Gender</TableCell>
-                      <TableCell>Age</TableCell>
-                      <TableCell>Email</TableCell>
+                      {displayColumns.map(column => (
+                        <TableCell key={column}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableCell>
+                      ))}
                       <TableCell>Target Age</TableCell>
                       <TableCell>Groupmate Redundancy</TableCell>
                       {groupSettings.splitByTargetAge && <TableCell>Unmet Target Age</TableCell>}
@@ -48,12 +45,9 @@ const GroupResults: React.FC = () => {
                           backgroundColor: groupLeaderValues.includes(participant.isGroupLeader) ? '#666' : 'inherit',
                         }}
                       >
-                        <TableCell>{participant.id}</TableCell>
-                        <TableCell>{participant.firstName}</TableCell>
-                        <TableCell>{participant.lastName}</TableCell>
-                        <TableCell>{participant.gender}</TableCell>
-                        <TableCell>{participant.age}</TableCell>
-                        <TableCell>{participant.email}</TableCell>
+                        {displayColumns.map(column => (
+                          <TableCell key={column}>{participant[column]}</TableCell>
+                        ))}
                         <TableCell>{participant.targetAge}</TableCell>
                         <TableCell>{participant.groupmateRedundancy}</TableCell>
                         {groupSettings.splitByTargetAge && <TableCell>{participant.unmetTargetAge}</TableCell>}

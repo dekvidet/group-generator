@@ -3,14 +3,12 @@ import { create } from 'zustand';
 
 interface Participant {
   id: string;
-  firstName: string;
-  lastName: string;
   gender: string;
   age: number;
-  email: string;
   isGroupLeader: boolean;
   groupmateRedundancy?: number;
   unmetTargetAge?: number;
+  [key: string]: any; // Allow for arbitrary additional properties
 }
 
 interface Group {
@@ -37,6 +35,7 @@ interface AppState {
   targetAgeRanges: { from: string; to: string; name: string }[];
   pastGroupmates: Record<string, Set<string>>;
   pastUnmetTargetAge: Record<string, number>;
+  displayColumns: string[];
   setFile: (file: File) => void;
   setHeaders: (headers: string[]) => void;
   setUniqueValues: (uniqueValues: Record<string, string[]>) => void;
@@ -51,6 +50,7 @@ interface AppState {
   setFemaleValues: (femaleValues: string[]) => void;
   setGroupLeaderValues: (groupLeaderValues: string[]) => void;
   setTargetAgeRanges: (targetAgeRanges: { from: string; to: string; name: string }[]) => void;
+  setDisplayColumns: (displayColumns: string[]) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -60,10 +60,7 @@ export const useStore = create<AppState>((set, get) => ({
   mappedColumns: {
     id: null,
     gender: null,
-    firstName: null,
-    lastName: null,
     age: null,
-    email: null,
     targetAge: null,
     isGroupLeader: null,
   },
@@ -86,6 +83,7 @@ export const useStore = create<AppState>((set, get) => ({
   targetAgeRanges: [],
   pastGroupmates: {},
   pastUnmetTargetAge: {},
+  displayColumns: ['id', 'gender', 'age'],
   setFile: (file) => set({ file }),
   setHeaders: (headers) => set({ headers }),
   setUniqueValues: (uniqueValues) => set({ uniqueValues }),
@@ -154,4 +152,5 @@ export const useStore = create<AppState>((set, get) => ({
   setFemaleValues: (femaleValues) => set({ femaleValues }),
   setGroupLeaderValues: (groupLeaderValues) => set({ groupLeaderValues }),
   setTargetAgeRanges: (targetAgeRanges) => set({ targetAgeRanges }),
+  setDisplayColumns: (displayColumns) => set({ displayColumns }),
 }));
