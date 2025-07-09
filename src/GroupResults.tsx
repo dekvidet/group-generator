@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useStore } from './store';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
@@ -33,7 +32,13 @@ const GroupResults: React.FC = () => {
                   </TableHead>
                   <TableBody>
                     {group.participants.map((participant: any) => (
-                      <TableRow key={participant.id} sx={{ fontWeight: groupLeaderValues.includes(participant.isGroupLeader) ? 'bold' : 'normal' }}>
+                      <TableRow
+                        key={participant.id}
+                        sx={{
+                          fontWeight: groupLeaderValues.includes(participant.isGroupLeader) ? 'bold' : 'normal',
+                          backgroundColor: groupLeaderValues.includes(participant.isGroupLeader) ? '#666' : 'inherit',
+                        }}
+                      >
                         <TableCell>{participant.id}</TableCell>
                         <TableCell>{participant.firstName}</TableCell>
                         <TableCell>{participant.lastName}</TableCell>
