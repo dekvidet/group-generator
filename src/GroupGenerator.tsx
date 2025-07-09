@@ -83,15 +83,33 @@ const GroupGenerator: React.FC = () => {
         currentGroup: any,
         remainingNonLeaders: any[],
         balanceGenders: boolean,
+        splitByTargetAge: boolean,
         shufflePolicy: string,
         maleValues: string[],
         femaleValues: string[],
         currentParticipantPairs: Set<string>,
-        groupSize: number
+        groupSize: number,
+        targetAgeRanges: { from: string; to: string; name: string }[]
       ) => {
         if (remainingNonLeaders.length === 0) return null;
 
         let candidates = [...remainingNonLeaders];
+
+        if (splitByTargetAge) {
+          const currentGroupAverageAge = getAverageAge(currentGroup);
+          const suitableCandidates = candidates.filter(p => {
+            const targetAgeRange = targetAgeRanges.find(range => range.name === p.targetAge);
+            if (targetAgeRange) {
+              const minAge = parseInt(targetAgeRange.from);
+              const maxAge = parseInt(targetAgeRange.to);
+              return currentGroupAverageAge >= minAge && currentGroupAverageAge <= maxAge;
+            }
+            return false;
+          });
+          if (suitableCandidates.length > 0) {
+            candidates = suitableCandidates;
+          }
+        }
 
         if (balanceGenders) {
           const currentMaleCount = currentGroup.participants.filter(p => maleValues.includes(p.gender)).length;
@@ -155,11 +173,13 @@ const GroupGenerator: React.FC = () => {
               group,
               availableNonLeaders,
               balanceGenders,
+              splitByTargetAge,
               shufflePolicy,
               maleValues,
               femaleValues,
               currentParticipantPairs,
-              groupSize
+              groupSize,
+              targetAgeRanges
             );
 
             if (participantToAssign) {
