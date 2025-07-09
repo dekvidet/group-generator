@@ -79,57 +79,98 @@ const GroupGenerator: React.FC = () => {
 
       let availableNonLeaders = [...nonLeaders];
 
-      if (shufflePolicy === 'unique') {
-        // Sort non-leaders to prioritize those with fewer past pairings
-        availableNonLeaders.sort((a, b) => {
-          let aPastPairs = 0;
-          let bPastPairs = 0;
-          for (const pair of currentParticipantPairs) {
-            if (pair.includes(a.id)) aPastPairs++;
-            if (pair.includes(b.id)) bPastPairs++;
-          }
-          return aPastPairs - bPastPairs;
-        });
+      const getBestParticipant = (
+        currentGroup: any,
+        remainingNonLeaders: any[],
+        balanceGenders: boolean,
+        shufflePolicy: string,
+        maleValues: string[],
+        femaleValues: string[],
+        currentParticipantPairs: Set<string>,
+        groupSize: number
+      ) => {
+        if (remainingNonLeaders.length === 0) return null;
 
-        // Assign non-leaders to groups, trying to avoid past pairings
-        for (const participant of availableNonLeaders) {
-          let bestGroup = null;
-          let minConflicts = Infinity;
+        let candidates = [...remainingNonLeaders];
 
-          for (const group of roundGroups) {
-            if (group.participants.length < groupSize) {
-              let conflicts = 0;
-              for (const existingParticipant of group.participants) {
-                const pairKey = `${Math.min(participant.id, existingParticipant.id)}-${Math.max(participant.id, existingParticipant.id)}`;
-                if (currentParticipantPairs.has(pairKey)) {
-                  conflicts++;
-                }
-              }
-              if (conflicts < minConflicts) {
-                minConflicts = conflicts;
-                bestGroup = group;
-              }
+        if (balanceGenders) {
+          const currentMaleCount = currentGroup.participants.filter(p => maleValues.includes(p.gender)).length;
+          const currentFemaleCount = currentGroup.participants.filter(p => femaleValues.includes(p.gender)).length;
+
+          const idealMaleCount = Math.ceil(groupSize / 2);
+          const idealFemaleCount = Math.floor(groupSize / 2);
+
+          let preferredGender = null;
+          if (currentMaleCount < idealMaleCount && currentFemaleCount < idealFemaleCount) {
+            const malesInRemaining = candidates.filter(p => maleValues.includes(p.gender)).length;
+            const femalesInRemaining = candidates.filter(p => femaleValues.includes(p.gender)).length;
+            if (malesInRemaining > 0 && femalesInRemaining > 0) {
+              preferredGender = (malesInRemaining <= femalesInRemaining) ? 'male' : 'female';
+            } else if (malesInRemaining > 0) {
+              preferredGender = 'male';
+            } else if (femalesInRemaining > 0) {
+              preferredGender = 'female';
             }
+          } else if (currentMaleCount < idealMaleCount) {
+            preferredGender = 'male';
+          } else if (currentFemaleCount < idealFemaleCount) {
+            preferredGender = 'female';
           }
-          if (bestGroup) {
-            bestGroup.participants.push(participant);
-          } else {
-            // If no suitable group found (e.g., all groups full or too many conflicts), add to a random available group
-            const availableGroups = roundGroups.filter(g => g.participants.length < groupSize);
-            if (availableGroups.length > 0) {
-              availableGroups[Math.floor(Math.random() * availableGroups.length)].participants.push(availableNonLeaders.shift());
+
+          if (preferredGender) {
+            const genderCandidates = candidates.filter(p =>
+              (preferredGender === 'male' && maleValues.includes(p.gender)) ||
+              (preferredGender === 'female' && femaleValues.includes(p.gender))
+            );
+            if (genderCandidates.length > 0) {
+              candidates = genderCandidates;
+            } else {
+              candidates = remainingNonLeaders;
             }
           }
         }
 
-      } else { // Random shuffle
-        availableNonLeaders.sort(() => 0.5 - Math.random());
-        let nonLeaderIndex = 0;
-        for (let j = 0; j < numGroups; j++) {
-          while (roundGroups[j].participants.length < groupSize && availableNonLeaders[nonLeaderIndex]) {
-            roundGroups[j].participants.push(availableNonLeaders[nonLeaderIndex]);
-            nonLeaderIndex++;
+        if (shufflePolicy === 'unique') {
+          return candidates.sort((a, b) => {
+            let aConflicts = 0;
+            let bConflicts = 0;
+            for (const existingParticipant of currentGroup.participants) {
+              const pairKeyA = `${Math.min(a.id, existingParticipant.id)}-${Math.max(a.id, existingParticipant.id)}`;
+              const pairKeyB = `${Math.min(b.id, existingParticipant.id)}-${Math.max(b.id, existingParticipant.id)}`;
+              if (currentParticipantPairs.has(pairKeyA)) aConflicts++;
+              if (currentParticipantPairs.has(pairKeyB)) bConflicts++;
+            }
+            return aConflicts - bConflicts;
+          })[0];
+        } else {
+          return candidates[Math.floor(Math.random() * candidates.length)];
+        }
+      };
+
+      while (availableNonLeaders.length > 0) {
+        let assignedThisIteration = false;
+        for (const group of roundGroups) {
+          if (group.participants.length < groupSize) {
+            const participantToAssign = getBestParticipant(
+              group,
+              availableNonLeaders,
+              balanceGenders,
+              shufflePolicy,
+              maleValues,
+              femaleValues,
+              currentParticipantPairs,
+              groupSize
+            );
+
+            if (participantToAssign) {
+              group.participants.push(participantToAssign);
+              availableNonLeaders = availableNonLeaders.filter(p => p.id !== participantToAssign.id);
+              assignedThisIteration = true;
+            }
           }
+        }
+        if (!assignedThisIteration && availableNonLeaders.length > 0) {
+          break;
         }
       }
 
