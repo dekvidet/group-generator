@@ -3,7 +3,7 @@ import { useStore } from './store';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 const GroupResults: React.FC = () => {
-  const { generatedGroups, groupLeaderValues } = useStore();
+  const { generatedGroups, groupLeaderValues, groupSettings } = useStore();
 
   const getAverageAge = (group: any) => {
     if (group.participants.length === 0) return 0;
@@ -36,6 +36,7 @@ const GroupResults: React.FC = () => {
                       <TableCell>Email</TableCell>
                       <TableCell>Target Age</TableCell>
                       <TableCell>Groupmate Redundancy</TableCell>
+                      {groupSettings.splitByTargetAge && <TableCell>Age Redundancy</TableCell>}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -55,6 +56,7 @@ const GroupResults: React.FC = () => {
                         <TableCell>{participant.email}</TableCell>
                         <TableCell>{participant.targetAge}</TableCell>
                         <TableCell>{participant.groupmateRedundancy}</TableCell>
+                        {groupSettings.splitByTargetAge && <TableCell>{participant.ageRedundancy}</TableCell>}
                       </TableRow>
                     ))}
                   </TableBody>

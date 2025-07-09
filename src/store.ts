@@ -10,6 +10,7 @@ interface Participant {
   email: string;
   isGroupLeader: boolean;
   groupmateRedundancy?: number;
+  ageRedundancy?: number;
 }
 
 interface Group {
@@ -92,7 +93,7 @@ export const useStore = create<AppState>((set, get) => ({
   setAgeGroups: (ageGroups) => set({ ageGroups }),
   setGroupSettings: (groupSettings) => set(state => ({ groupSettings: { ...state.groupSettings, ...groupSettings } })),
   setGeneratedGroups: (newGeneratedGroups: Round[]) => {
-    const { pastGroupmates } = get();
+    const { pastGroupmates, groupSettings, targetAgeRanges } = get();
     const updatedPastGroupmates = { ...pastGroupmates };
     const groupsWithRedundancy = newGeneratedGroups.map((round, roundIndex) => {
       return round.map(group => {
@@ -106,7 +107,25 @@ export const useStore = create<AppState>((set, get) => ({
               }
             });
           }
-          return { ...participant, groupmateRedundancy: redundancy };
+
+          let ageRedundancy = 0;
+          if (groupSettings.splitByTargetAge) {
+            const participantTargetAgeRange = targetAgeRanges.find(range => range.name === participant.targetAge);
+            if (participantTargetAgeRange) {
+              const minAge = parseInt(participantTargetAgeRange.from);
+              const maxAge = parseInt(participantTargetAgeRange.to);
+
+              group.participants.forEach(otherParticipant => {
+                if (participant.id !== otherParticipant.id) {
+                  const otherParticipantAge = parseInt(otherParticipant.age);
+                  if (otherParticipantAge < minAge || otherParticipantAge > maxAge) {
+                    ageRedundancy++;
+                  }
+                }
+              });
+            }
+          }
+          return { ...participant, groupmateRedundancy: redundancy, ageRedundancy };
         });
 
         // Update pastGroupmates for all participants in the current group

@@ -253,6 +253,10 @@ const GroupGenerator: React.FC = () => {
     XLSX.writeFile(wb, 'group_results.xlsx');
   };
 
+  if (processedData.length === 0) {
+    return null;
+  }
+
   return (
     <Box sx={{ marginTop: '20px' }}>
       <Typography variant="h6">Group Generation Settings</Typography>
