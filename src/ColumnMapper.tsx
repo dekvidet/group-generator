@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useStore } from './store';
 import { Box, FormControl, InputLabel, Select, MenuItem, Typography, TextField, Button, Checkbox, ListItemText } from '@mui/material';
@@ -79,72 +80,84 @@ const ColumnMapper: React.FC = () => {
     <Box sx={{ marginTop: '20px' }}>
       <Typography variant="h6">Map Columns</Typography>
       {Object.keys(mappedColumns).map(field => (
-        <FormControl fullWidth sx={{ marginTop: '10px' }} key={field}>
-          <InputLabel>{field.charAt(0).toUpperCase() + field.slice(1)}</InputLabel>
-          <Select value={mappedColumns[field] || ''} onChange={(e) => handleChange(field, e.target.value)}>
-            {headers.map(header => (
-              <MenuItem key={header} value={header}>{header}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      ))}
-
-      {mappedColumns.gender && (
-        <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
-          <FormControl fullWidth>
-            <InputLabel>Male</InputLabel>
-            <Select multiple value={maleValues} onChange={(e) => setMaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')}>
-              {uniqueValues[mappedColumns.gender]?.map(value => (
-                <MenuItem key={value} value={value}>
-                  <Checkbox checked={maleValues.indexOf(value) > -1} />
-                  <ListItemText primary={value} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+        <React.Fragment key={field}>
           <FormControl fullWidth sx={{ marginTop: '10px' }}>
-            <InputLabel>Female</InputLabel>
-            <Select multiple value={femaleValues} onChange={(e) => setFemaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')}>
-              {uniqueValues[mappedColumns.gender]?.map(value => (
-                <MenuItem key={value} value={value}>
-                  <Checkbox checked={femaleValues.indexOf(value) > -1} />
-                  <ListItemText primary={value} />
-                </MenuItem>
+            <InputLabel>{field.charAt(0).toUpperCase() + field.slice(1)}</InputLabel>
+            <Select value={mappedColumns[field] || ''} onChange={(e) => handleChange(field, e.target.value)}>
+              {headers.map(header => (
+                <MenuItem key={header} value={header}>{header}</MenuItem>
               ))}
             </Select>
           </FormControl>
-        </Box>
-      )}
 
-      {mappedColumns.targetAge && (
-        <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
-          <Typography>Target Age Ranges</Typography>
-          {targetAgeRanges.map((range, index) => (
-            <Box key={index} sx={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-              <TextField label="From" value={range.from} onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].from = e.target.value; setTargetAgeRanges(newRanges); }} />
-              <TextField label="To" value={range.to} onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].to = e.target.value; setTargetAgeRanges(newRanges); }} />
-              <TextField label="Name" value={range.name} onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].name = e.target.value; setTargetAgeRanges(newRanges); }} />
+          {field === 'gender' && mappedColumns.gender && (
+            <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
+              <FormControl fullWidth>
+                <InputLabel>Male</InputLabel>
+                <Select multiple value={maleValues} onChange={(e) => setMaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')}>
+                  {uniqueValues[mappedColumns.gender]?.map(value => (
+                    <MenuItem key={value} value={value}>
+                      <Checkbox checked={maleValues.indexOf(value) > -1} />
+                      <ListItemText primary={value} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth sx={{ marginTop: '10px' }}>
+                <InputLabel>Female</InputLabel>
+                <Select multiple value={femaleValues} onChange={(e) => setFemaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')}>
+                  {uniqueValues[mappedColumns.gender]?.map(value => (
+                    <MenuItem key={value} value={value}>
+                      <Checkbox checked={femaleValues.indexOf(value) > -1} />
+                      <ListItemText primary={value} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Box>
-          ))}
-          <Button onClick={() => setTargetAgeRanges([...targetAgeRanges, { from: '', to: '', name: '' }])}>Add Range</Button>
-        </Box>
-      )}
+          )}
 
-      {mappedColumns.isGroupLeader && (
-        <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
-          <FormControl fullWidth>
-            <InputLabel>Group Leader Values</InputLabel>
-            <Select multiple value={groupLeaderValues} onChange={(e) => setGroupLeaderValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')}>
-              {uniqueValues[mappedColumns.isGroupLeader]?.map(value => (
-                <MenuItem key={value} value={value}>
-                  <Checkbox checked={groupLeaderValues.indexOf(value) > -1} />
-                  <ListItemText primary={value} />
-                </MenuItem>
+          {field === 'targetAge' && mappedColumns.targetAge && (
+            <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
+              <Typography>Target Age Ranges</Typography>
+              {targetAgeRanges.map((range, index) => (
+                <Box key={index} sx={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                  <TextField label="From" value={range.from} onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].from = e.target.value; setTargetAgeRanges(newRanges); }} />
+                  <TextField label="To" value={range.to} onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].to = e.target.value; setTargetAgeRanges(newRanges); }} />
+                  <FormControl sx={{ minWidth: 120 }}>
+                    <InputLabel>Name</InputLabel>
+                    <Select
+                      value={range.name}
+                      onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].name = e.target.value; setTargetAgeRanges(newRanges); }}
+                    >
+                      {uniqueValues[mappedColumns.targetAge]?.map(value => (
+                        <MenuItem key={value} value={value}>{value}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
               ))}
-            </Select>
-          </FormControl>
-        </Box>
-      )}
+              <Button onClick={() => setTargetAgeRanges([...targetAgeRanges, { from: '', to: '', name: '' }])}>Add Range</Button>
+            </Box>
+          )}
+
+          {field === 'isGroupLeader' && mappedColumns.isGroupLeader && (
+            <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
+              <FormControl fullWidth>
+                <InputLabel>Group Leader Values</InputLabel>
+                <Select multiple value={groupLeaderValues} onChange={(e) => setGroupLeaderValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')}>
+                  {uniqueValues[mappedColumns.isGroupLeader]?.map(value => (
+                    <MenuItem key={value} value={value}>
+                      <Checkbox checked={groupLeaderValues.indexOf(value) > -1} />
+                      <ListItemText primary={value} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          )}
+        </React.Fragment>
+      ))}
 
       <Button variant="contained" sx={{ marginTop: '20px' }} onClick={handleProcess}>Process</Button>
     </Box>
