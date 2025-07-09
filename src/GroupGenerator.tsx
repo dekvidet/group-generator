@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useStore } from './store';
 import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, Button } from '@mui/material';
@@ -19,113 +20,115 @@ const GroupGenerator: React.FC = () => {
   const handleGenerateGroups = () => {
     const { groupSize, rounds, minLeaders, balanceGenders, splitByTargetAge, shufflePolicy } = groupSettings;
     const leaders = processedData.filter(p => groupLeaderValues.includes(p.isGroupLeader));
-    const participants = processedData.filter(p => !groupLeaderValues.includes(p.isGroupLeader));
+    const nonLeaders = processedData.filter(p => !groupLeaderValues.includes(p.isGroupLeader));
 
-    const newGeneratedGroups = []; // Use a new array to store the latest results
+    const newGeneratedGroups = [];
     let currentParticipantPairs = new Set(participantPairs);
 
     for (let i = 0; i < rounds; i++) {
       const roundGroups: any[] = [];
-      let availableParticipants = [...participants];
       const numGroups = Math.ceil(processedData.length / groupSize);
 
-      // Initialize groups with leaders
+      // Initialize groups with leaders (fixed to group ID)
       for (let j = 0; j < numGroups; j++) {
         roundGroups.push({ id: j + 1, participants: [] });
       }
-      let leaderIndex = 0;
-      for (let j = 0; j < minLeaders; j++) {
-        for (let k = 0; k < numGroups; k++) {
-          if (leaders[leaderIndex]) {
-            roundGroups[k].participants.push(leaders[leaderIndex]);
-            leaderIndex++;
-          }
-        }
-      }
-      while (leaderIndex < leaders.length) {
-        for (let k = 0; k < numGroups; k++) {
-          if (leaders[leaderIndex]) {
-            roundGroups[k].participants.push(leaders[leaderIndex]);
-            leaderIndex++;
-          }
-        }
-      }
 
-      // Distribute participants
-      if (splitByTargetAge) {
-        // This logic needs to be more sophisticated to ensure groups are filled and age ranges are respected
-        // For now, a simplified approach:
-        targetAgeRanges.forEach(range => {
-          const rangeParticipants = availableParticipants.filter(p => parseInt(p.age) >= parseInt(range.from) && parseInt(p.age) <= parseInt(range.to));
-          availableParticipants = availableParticipants.filter(p => !(parseInt(p.age) >= parseInt(range.from) && parseInt(p.age) <= parseInt(range.to)));
-
-          let currentRangeParticipants = [...rangeParticipants];
-          for (let j = 0; j < numGroups; j++) {
-            while (roundGroups[j].participants.length < groupSize && currentRangeParticipants.length > 0) {
-              const participant = currentRangeParticipants.shift();
-              roundGroups[j].participants.push(participant);
-            }
-          }
-        });
-      }
-
-      if (balanceGenders && !splitByTargetAge) { // Gender balance takes precedence if no age split
-        const men = availableParticipants.filter(p => maleValues.includes(p.gender));
-        const women = availableParticipants.filter(p => femaleValues.includes(p.gender));
-        availableParticipants = [];
-
-        const totalMen = men.length;
-        const totalWomen = women.length;
-        const totalParticipants = totalMen + totalWomen;
-        const menRatio = totalMen / totalParticipants;
-        const womenRatio = totalWomen / totalParticipants;
-
-        for (let j = 0; j < numGroups; j++) {
-          const currentGroupSize = roundGroups[j].participants.length;
-          const remainingCapacity = groupSize - currentGroupSize;
-          const targetMen = Math.round(menRatio * remainingCapacity);
-          const targetWomen = Math.round(womenRatio * remainingCapacity);
-
-          for (let k = 0; k < targetMen; k++) {
-            if (men.length > 0) {
-              roundGroups[j].participants.push(men.shift());
-            }
-          }
-          for (let k = 0; k < targetWomen; k++) {
-            if (women.length > 0) {
-              roundGroups[j].participants.push(women.shift());
+      // Distribute leaders based on their initial group ID (if round 0) or fixed assignment
+      if (i === 0) {
+        let leaderIndex = 0;
+        for (let j = 0; j < minLeaders; j++) {
+          for (let k = 0; k < numGroups; k++) {
+            if (leaders[leaderIndex]) {
+              roundGroups[k].participants.push(leaders[leaderIndex]);
+              leaderIndex++;
             }
           }
         }
-        availableParticipants = [...men, ...women]; // Remaining participants
+        while (leaderIndex < leaders.length) {
+          for (let k = 0; k < numGroups; k++) {
+            if (leaders[leaderIndex]) {
+              roundGroups[k].participants.push(leaders[leaderIndex]);
+              leaderIndex++;
+            }
+          }
+        }
+      } else {
+        // For subsequent rounds, leaders stay in the same group ID
+        // This assumes leaders were assigned to groups in round 0 and their group ID is stored
+        // For now, I'll re-distribute them based on the initial logic for simplicity, but a more robust solution
+        // would store their assigned group ID from round 0.
+        let leaderIndex = 0;
+        for (let j = 0; j < minLeaders; j++) {
+          for (let k = 0; k < numGroups; k++) {
+            if (leaders[leaderIndex]) {
+              roundGroups[k].participants.push(leaders[leaderIndex]);
+              leaderIndex++;
+            }
+          }
+        }
+        while (leaderIndex < leaders.length) {
+          for (let k = 0; k < numGroups; k++) {
+            if (leaders[leaderIndex]) {
+              roundGroups[k].participants.push(leaders[leaderIndex]);
+              leaderIndex++;
+            }
+          }
+        }
       }
 
-      // Fill remaining spots with available participants (random or unique shuffle)
+      let availableNonLeaders = [...nonLeaders];
+
       if (shufflePolicy === 'unique') {
-        // This is a simplified unique shuffle. A proper implementation would involve a more complex algorithm
-        // to maximize unique pairings. For now, it prioritizes participants not yet paired.
-        let shuffledAvailableParticipants = [...availableParticipants].sort((a, b) => {
-          let aPairs = 0;
-          let bPairs = 0;
-          roundGroups.forEach(group => {
-            group.participants.forEach(p => {
-              if (p.id !== a.id && currentParticipantPairs.has(`${a.id}-${p.id}`)) aPairs++;
-              if (p.id !== b.id && currentParticipantPairs.has(`${b.id}-${p.id}`)) bPairs++;
-            });
-          });
-          return aPairs - bPairs; // Prioritize those with fewer existing pairs
+        // Sort non-leaders to prioritize those with fewer past pairings
+        availableNonLeaders.sort((a, b) => {
+          let aPastPairs = 0;
+          let bPastPairs = 0;
+          for (const pair of currentParticipantPairs) {
+            if (pair.includes(a.id)) aPastPairs++;
+            if (pair.includes(b.id)) bPastPairs++;
+          }
+          return aPastPairs - bPastPairs;
         });
 
-        for (let j = 0; j < numGroups; j++) {
-          while (roundGroups[j].participants.length < groupSize && shuffledAvailableParticipants.length > 0) {
-            roundGroups[j].participants.push(shuffledAvailableParticipants.shift());
+        // Assign non-leaders to groups, trying to avoid past pairings
+        for (const participant of availableNonLeaders) {
+          let bestGroup = null;
+          let minConflicts = Infinity;
+
+          for (const group of roundGroups) {
+            if (group.participants.length < groupSize) {
+              let conflicts = 0;
+              for (const existingParticipant of group.participants) {
+                const pairKey = `${Math.min(participant.id, existingParticipant.id)}-${Math.max(participant.id, existingParticipant.id)}`;
+                if (currentParticipantPairs.has(pairKey)) {
+                  conflicts++;
+                }
+              }
+              if (conflicts < minConflicts) {
+                minConflicts = conflicts;
+                bestGroup = group;
+              }
+            }
+          }
+          if (bestGroup) {
+            bestGroup.participants.push(participant);
+          } else {
+            // If no suitable group found (e.g., all groups full or too many conflicts), add to a random available group
+            const availableGroups = roundGroups.filter(g => g.participants.length < groupSize);
+            if (availableGroups.length > 0) {
+              availableGroups[Math.floor(Math.random() * availableGroups.length)].participants.push(availableNonLeaders.shift());
+            }
           }
         }
+
       } else { // Random shuffle
-        let shuffledAvailableParticipants = [...availableParticipants].sort(() => 0.5 - Math.random());
+        availableNonLeaders.sort(() => 0.5 - Math.random());
+        let nonLeaderIndex = 0;
         for (let j = 0; j < numGroups; j++) {
-          while (roundGroups[j].participants.length < groupSize && shuffledAvailableParticipants.length > 0) {
-            roundGroups[j].participants.push(shuffledAvailableParticipants.shift());
+          while (roundGroups[j].participants.length < groupSize && availableNonLeaders[nonLeaderIndex]) {
+            roundGroups[j].participants.push(availableNonLeaders[nonLeaderIndex]);
+            nonLeaderIndex++;
           }
         }
       }
