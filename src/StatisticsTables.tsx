@@ -12,6 +12,8 @@ const StatisticsTables: React.FC = () => {
   }
 
   const showAgeGroupsTable = mappedColumns.age && mappedColumns.targetAge;
+  const showGenderRows = mappedColumns.gender;
+  const showTeamLeadersColumn = mappedColumns.isGroupLeader;
 
   return (
     <Box sx={{ marginTop: '20px', display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: '20px' }}>
@@ -23,24 +25,28 @@ const StatisticsTables: React.FC = () => {
               <TableRow>
                 <TableCell></TableCell>
                 <TableCell>{t('statisticsTables.texts.allParticipants')}</TableCell>
-                <TableCell>{t('statisticsTables.texts.teamLeaders')}</TableCell>
+                {showTeamLeadersColumn && <TableCell>{t('statisticsTables.texts.teamLeaders')}</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
-              <TableRow>
-                <TableCell>{t('statisticsTables.texts.male')}</TableCell>
-                <TableCell>{participantRatios.men.all}</TableCell>
-                <TableCell>{participantRatios.men.leaders}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>{t('statisticsTables.texts.female')}</TableCell>
-                <TableCell>{participantRatios.women.all}</TableCell>
-                <TableCell>{participantRatios.women.leaders}</TableCell>
-              </TableRow>
+              {showGenderRows && (
+                <>
+                  <TableRow>
+                    <TableCell>{t('statisticsTables.texts.male')}</TableCell>
+                    <TableCell>{participantRatios.men.all}</TableCell>
+                    {showTeamLeadersColumn && <TableCell>{participantRatios.men.leaders}</TableCell>}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>{t('statisticsTables.texts.female')}</TableCell>
+                    <TableCell>{participantRatios.women.all}</TableCell>
+                    {showTeamLeadersColumn && <TableCell>{participantRatios.women.leaders}</TableCell>}
+                  </TableRow>
+                </>
+              )}
               <TableRow>
                 <TableCell>{t('statisticsTables.texts.total')}</TableCell>
                 <TableCell>{participantRatios.men.all + participantRatios.women.all}</TableCell>
-                <TableCell>{participantRatios.men.leaders + participantRatios.women.leaders}</TableCell>
+                {showTeamLeadersColumn && <TableCell>{participantRatios.men.leaders + participantRatios.women.leaders}</TableCell>}
               </TableRow>
             </TableBody>
           </Table>
