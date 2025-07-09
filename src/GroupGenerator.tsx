@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { useStore } from './store';
 import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, Button } from '@mui/material';
+import * as XLSX from 'xlsx';
 
 const GroupGenerator: React.FC = () => {
-  const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, groupLeaderValues, maleValues, femaleValues, targetAgeRanges, participantPairs, setParticipantPairs } = useStore();
+  const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, groupLeaderValues, maleValues, femaleValues, targetAgeRanges, participantPairs, setParticipantPairs, generatedGroups } = useStore();
 
   const handleChange = (field: string, value: any) => {
     setGroupSettings({ [field]: value });
@@ -21,7 +21,7 @@ const GroupGenerator: React.FC = () => {
     const leaders = processedData.filter(p => groupLeaderValues.includes(p.isGroupLeader));
     const participants = processedData.filter(p => !groupLeaderValues.includes(p.isGroupLeader));
 
-    const generatedGroups = [];
+    const newGeneratedGroups = []; // Use a new array to store the latest results
     let currentParticipantPairs = new Set(participantPairs);
 
     for (let i = 0; i < rounds; i++) {
@@ -141,10 +141,52 @@ const GroupGenerator: React.FC = () => {
         }
       });
 
-      generatedGroups.push(roundGroups);
+      newGeneratedGroups.push(roundGroups);
     }
-    setGeneratedGroups(generatedGroups);
+    setGeneratedGroups(newGeneratedGroups);
     setParticipantPairs(currentParticipantPairs);
+  };
+
+  const handleDownload = () => {
+    const wb = XLSX.utils.book_new();
+
+    generatedGroups.forEach((round, roundIndex) => {
+      const ws_data: any[][] = [['ID', 'Full Name']];
+      const roundParticipants = new Map();
+
+      round.forEach((group: any) => {
+        group.participants.forEach((participant: any) => {
+          if (!roundParticipants.has(participant.id)) {
+            roundParticipants.set(participant.id, {
+              fullName: `${participant.firstName} ${participant.lastName}`,
+              isLeader: groupLeaderValues.includes(participant.isGroupLeader) ? 'X' : '',
+              groups: {}
+            });
+          }
+          roundParticipants.get(participant.id).groups[roundIndex] = group.id;
+        });
+      });
+
+      const maxRound = generatedGroups.length - 1;
+      for (let i = 0; i <= maxRound; i++) {
+        ws_data[0].push(`Round ${i + 1}`);
+      }
+      ws_data[0].push('Group Leader');
+
+      roundParticipants.forEach((value, key) => {
+        const row = [key, value.fullName];
+        for (let i = 0; i <= maxRound; i++) {
+          row.push(value.groups[i] || '');
+        }
+        row.push(value.isLeader);
+        ws_data.push(row);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(ws_data);
+      XLSX.utils.book_append_sheet(wb, ws, `Round ${roundIndex + 1}`);
+    });
+
+    XLSX.writeFile(wb, 'group_results.xlsx');
   };
 
   return (
@@ -162,7 +204,10 @@ const GroupGenerator: React.FC = () => {
       </FormControl>
       <FormControlLabel control={<Checkbox checked={groupSettings.balanceGenders} onChange={(e) => handleChange('balanceGenders', e.target.checked)} />} label="Balance genders" />
       <FormControlLabel control={<Checkbox checked={groupSettings.splitByTargetAge} onChange={(e) => handleChange('splitByTargetAge', e.target.checked)} />} label="Split by target age" />
-      <Button variant="contained" sx={{ marginTop: '20px' }} onClick={handleGenerateGroups}>Generate Groups</Button>
+      <Box sx={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+        <Button variant="contained" onClick={handleGenerateGroups}>Generate Groups</Button>
+        <Button variant="contained" onClick={handleDownload} disabled={generatedGroups.length === 0}>Download XLS</Button>
+      </Box>
     </Box>
   );
 };
