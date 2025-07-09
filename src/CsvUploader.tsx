@@ -15,6 +15,7 @@ const CsvUploader: React.FC = () => {
 
     Papa.parse(file, {
       header: true,
+      skipEmptyLines: true,
       complete: (results) => {
         const headers = results.meta.fields || [];
         setHeaders(headers);

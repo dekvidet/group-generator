@@ -17,7 +17,9 @@ const ColumnMapper: React.FC = () => {
     if (file) {
       Papa.parse(file, {
         header: true,
+        skipEmptyLines: true,
         complete: (results) => {
+          console.log(results)
           const data = (results.data as any[]).map(row => {
             const newRow: any = {};
             // Include all original CSV headers in newRow
@@ -39,6 +41,7 @@ const ColumnMapper: React.FC = () => {
           const participantRatios = {
             men: { all: 0, leaders: 0 },
             women: { all: 0, leaders: 0 },
+            unknown: { all: 0, leaders: 0 },
           };
 
           const ageGroups: Record<string, { men: number, women: number }> = {};
@@ -47,15 +50,20 @@ const ColumnMapper: React.FC = () => {
           });
 
           data.forEach(row => {
-            if (maleValues.includes(row.gender)) {
+            if (mappedColumns.gender && maleValues.includes(row.gender)) {
               participantRatios.men.all++;
-              if (groupLeaderValues.includes(row.isGroupLeader)) {
+              if (mappedColumns.isGroupLeader && groupLeaderValues.includes(row.isGroupLeader)) {
                 participantRatios.men.leaders++;
               }
-            } else if (femaleValues.includes(row.gender)) {
+            } else if (mappedColumns.gender && femaleValues.includes(row.gender)) {
               participantRatios.women.all++;
-              if (groupLeaderValues.includes(row.isGroupLeader)) {
+              if (mappedColumns.isGroupLeader && groupLeaderValues.includes(row.isGroupLeader)) {
                 participantRatios.women.leaders++;
+              }
+            } else {
+              participantRatios.unknown.all++;
+              if (mappedColumns.isGroupLeader && groupLeaderValues.includes(row.isGroupLeader)) {
+                participantRatios.unknown.leaders++;
               }
             }
 
@@ -63,9 +71,9 @@ const ColumnMapper: React.FC = () => {
             const age = parseInt(row.age);
             targetAgeRanges.forEach(range => {
               if (age >= parseInt(range.from) && age <= parseInt(range.to)) {
-                if (maleValues.includes(row.gender)) {
+                if (mappedColumns.gender && maleValues.includes(row.gender)) {
                   ageGroups[range.name].men++;
-                } else if (femaleValues.includes(row.gender)) {
+                } else if (mappedColumns.gender && femaleValues.includes(row.gender)) {
                   ageGroups[range.name].women++;
                 }
               }

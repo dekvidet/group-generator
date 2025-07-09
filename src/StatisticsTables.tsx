@@ -43,10 +43,17 @@ const StatisticsTables: React.FC = () => {
                   </TableRow>
                 </>
               )}
+              {(!showGenderRows || participantRatios.unknown.all > 0) && (
+                <TableRow>
+                  <TableCell>{t('statisticsTables.texts.unknown')}</TableCell>
+                  <TableCell>{participantRatios.unknown.all}</TableCell>
+                  {showTeamLeadersColumn && <TableCell>{participantRatios.unknown.leaders}</TableCell>}
+                </TableRow>
+              )}
               <TableRow>
                 <TableCell>{t('statisticsTables.texts.total')}</TableCell>
-                <TableCell>{participantRatios.men.all + participantRatios.women.all}</TableCell>
-                {showTeamLeadersColumn && <TableCell>{participantRatios.men.leaders + participantRatios.women.leaders}</TableCell>}
+                <TableCell>{participantRatios.men.all + participantRatios.women.all + participantRatios.unknown.all}</TableCell>
+                {showTeamLeadersColumn && <TableCell>{participantRatios.men.leaders + participantRatios.women.leaders + participantRatios.unknown.leaders}</TableCell>}
               </TableRow>
             </TableBody>
           </Table>
