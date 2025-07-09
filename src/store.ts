@@ -83,7 +83,7 @@ export const useStore = create<AppState>((set, get) => ({
   targetAgeRanges: [],
   pastGroupmates: {},
   pastUnmetTargetAge: {},
-  displayColumns: ['id', 'gender', 'age'],
+  displayColumns: [],
   setFile: (file) => set({ file }),
   setHeaders: (headers) => set({ headers }),
   setUniqueValues: (uniqueValues) => set({ uniqueValues }),

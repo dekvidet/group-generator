@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { useStore } from './store';
-import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, Button } from '@mui/material';
+import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, Button, Chip, ListItemText } from '@mui/material';
 import * as XLSX from 'xlsx';
 
 const GroupGenerator: React.FC = () => {
-  const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, groupLeaderValues, maleValues, femaleValues, targetAgeRanges, participantPairs, setParticipantPairs, generatedGroups, displayColumns } = useStore();
+  const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, groupLeaderValues, maleValues, femaleValues, targetAgeRanges, participantPairs, setParticipantPairs, generatedGroups, displayColumns, setDisplayColumns, headers } = useStore();
 
   const handleChange = (field: string, value: any) => {
     setGroupSettings({ [field]: value });
@@ -275,6 +275,28 @@ const GroupGenerator: React.FC = () => {
       </FormControl>
       <FormControlLabel control={<Checkbox checked={groupSettings.balanceGenders} onChange={(e) => handleChange('balanceGenders', e.target.checked)} />} label="Balance genders" />
       <FormControlLabel control={<Checkbox checked={groupSettings.splitByTargetAge} onChange={(e) => handleChange('splitByTargetAge', e.target.checked)} />} label="Split by target age" />
+      <FormControl fullWidth sx={{ marginTop: '10px' }}>
+        <InputLabel>Columns to Display</InputLabel>
+        <Select
+          multiple
+          value={displayColumns}
+          onChange={(e) => setDisplayColumns(e.target.value as string[])}
+          renderValue={(selected) => (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {(selected as string[]).map((value) => (
+                <Chip key={value} label={value} />
+              ))}
+            </Box>
+          )}
+        >
+          {headers.map((header) => (
+            <MenuItem key={header} value={header}>
+              <Checkbox checked={displayColumns.indexOf(header) > -1} />
+              <ListItemText primary={header} />
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       <Box sx={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
         <Button variant="contained" onClick={handleGenerateGroups}>Generate Groups</Button>
         <Button variant="contained" onClick={handleDownload} disabled={generatedGroups.length === 0}>Download XLS</Button>

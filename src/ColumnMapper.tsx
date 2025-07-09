@@ -164,22 +164,7 @@ const ColumnMapper: React.FC = () => {
         </React.Fragment>
       ))}
 
-      <FormControl fullWidth sx={{ marginTop: '20px' }}>
-        <InputLabel>Columns to Display</InputLabel>
-        <Select
-          multiple
-          value={displayColumns}
-          onChange={(e) => setDisplayColumns(e.target.value as string[])}
-          renderValue={(selected) => (selected as string[]).join(', ')}
-        >
-          {headers.map((header) => (
-            <MenuItem key={header} value={header}>
-              <Checkbox checked={displayColumns.indexOf(header) > -1} />
-              <ListItemText primary={header} />
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      
 
       <Button variant="contained" sx={{ marginTop: '20px' }} onClick={handleProcess}>Process</Button>
     </Box>
