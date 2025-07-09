@@ -17,7 +17,7 @@ const StatisticsTables: React.FC = () => {
 
   return (
     <Box sx={{ marginTop: '20px', display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: '20px' }}>
-      <Box>
+      <Box sx={{ flexGrow: 1 }}>
         <Typography variant="h6">{t('statisticsTables.texts.participantRatios')}</Typography>
         <TableContainer component={Paper} sx={{ width: '100%' }}>
           <Table>
@@ -60,7 +60,7 @@ const StatisticsTables: React.FC = () => {
         </TableContainer>
       </Box>
       {showAgeGroupsTable && (
-        <Box>
+        <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h6">{t('statisticsTables.texts.ageGroups')}</Typography>
           <TableContainer component={Paper} sx={{ width: '100%' }}>
             <Table>
