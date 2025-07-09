@@ -214,44 +214,44 @@ const GroupGenerator: React.FC = () => {
   const handleDownload = () => {
     const wb = XLSX.utils.book_new();
 
+    const ws_data: any[][] = [[]];
+    displayColumns.forEach(col => ws_data[0].push(col.charAt(0).toUpperCase() + col.slice(1)));
+    ws_data[0].push('Group Leader');
+
+    const maxRound = generatedGroups.length; // Total number of rounds
+    for (let i = 0; i < maxRound; i++) {
+      ws_data[0].push(`Round ${i + 1}`);
+    }
+
+    const allParticipants = new Map(); // Map to store unique participants and their group assignments across all rounds
+
     generatedGroups.forEach((round, roundIndex) => {
-      const ws_data: any[][] = [[]];
-      displayColumns.forEach(col => ws_data[0].push(col.charAt(0).toUpperCase() + col.slice(1)));
-      ws_data[0].push('Group Leader');
-
-      const roundParticipants = new Map();
-
       round.forEach((group: any) => {
         group.participants.forEach((participant: any) => {
-          if (!roundParticipants.has(participant.id)) {
-            roundParticipants.set(participant.id, {
+          if (!allParticipants.has(participant.id)) {
+            allParticipants.set(participant.id, {
               isLeader: groupLeaderValues.includes(participant.isGroupLeader) ? 'X' : '',
-              groups: {},
+              groups: new Array(maxRound).fill(''), // Initialize with empty strings for all rounds
               data: participant
             });
           }
-          roundParticipants.get(participant.id).groups[roundIndex] = group.id;
+          allParticipants.get(participant.id).groups[roundIndex] = group.id;
         });
       });
-
-      const maxRound = generatedGroups.length - 1;
-      for (let i = 0; i <= maxRound; i++) {
-        ws_data[0].push(`Round ${i + 1}`);
-      }
-
-      roundParticipants.forEach((value, key) => {
-        const row: any[] = [];
-        displayColumns.forEach(col => row.push(value.data[col]));
-        row.push(value.isLeader);
-        for (let i = 0; i <= maxRound; i++) {
-          row.push(value.groups[i] || '');
-        }
-        ws_data.push(row);
-      });
-
-      const ws = XLSX.utils.aoa_to_sheet(ws_data);
-      XLSX.utils.book_append_sheet(wb, ws, `Round ${roundIndex + 1}`);
     });
+
+    allParticipants.forEach((value, key) => {
+      const row: any[] = [];
+      displayColumns.forEach(col => row.push(value.data[col]));
+      row.push(value.isLeader);
+      for (let i = 0; i < maxRound; i++) {
+        row.push(value.groups[i]);
+      }
+      ws_data.push(row);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    XLSX.utils.book_append_sheet(wb, ws, 'All Rounds');
 
     XLSX.writeFile(wb, 'group_results.xlsx');
   };
