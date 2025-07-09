@@ -1,0 +1,84 @@
+{
+  "mapColumns": {
+    "texts": {
+      "header": "Map Columns",
+      "subHeader": "Please map the columns from your CSV to the appropriate fields."
+    },
+    "fields": {
+      "id": "ID Column",
+      "isGroupLeader": "Is Group Leader Column",
+      "gender": "Gender Column",
+      "age": "Age Column",
+      "targetAge": "Target Age Column",
+      "from": "From",
+      "to": "To",
+      "name": "Name",
+      "addRange": "Add Range",
+      "process": "Process"
+    }
+  },
+  "csvUploader": {
+    "texts": {
+      "header": "Upload CSV",
+      "subHeader": "Upload your CSV file to get started.",
+      "dragAndDrop": "Drag and drop your CSV file here, or click to select one"
+    }
+  },
+  "groupGenerator": {
+    "texts": {
+      "header": "Group Generation Settings",
+      "downloadXls": "Download XLS",
+      "generateGroups": "Generate Groups"
+    },
+    "fields": {
+      "groupSize": "Size of groups",
+      "minLeaders": "Minimum number of group leaders in a group",
+      "rounds": "Number of rounds",
+      "shufflePolicy": "Shuffle Policy",
+      "balanceGenders": "Balance genders",
+      "splitByTargetAge": "Split by target age",
+      "columnsToDisplay": "Columns to Display"
+    },
+    "shufflePolicyOptions": {
+      "unique": "Unique",
+      "random": "Random"
+    }
+  },
+  "groupResults": {
+    "texts": {
+      "header": "Generated Groups",
+      "round": "Round"
+    },
+    "fields": {
+      "targetAge": "Target Age",
+      "groupmateRedundancy": "Groupmate Redundancy",
+      "unmetTargetAge": "Unmet Target Age",
+      "group": "Group",
+      "averageAge": "average age"
+    }
+  },
+  "app": {
+    "title": "Team Generator"
+  },
+  "statisticsTables": {
+    "texts": {
+      "header": "Statistics",
+      "genderDistribution": "Gender Distribution",
+      "ageDistribution": "Age Distribution",
+      "groupLeaderDistribution": "Group Leader Distribution",
+      "averageAge": "Average Age",
+      "minAge": "Min Age",
+      "maxAge": "Max Age",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "leader": "Leader",
+      "nonLeader": "Non-Leader",
+      "participantRatios": "Participant Ratios",
+      "allParticipants": "All Participants",
+      "teamLeaders": "Team Leaders",
+      "total": "Total",
+      "ageGroups": "Age Groups"
+    }
+  }
+}

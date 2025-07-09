@@ -5,13 +5,16 @@ import ColumnMapper from './ColumnMapper';
 import StatisticsTables from './StatisticsTables';
 import GroupGenerator from './GroupGenerator';
 import GroupResults from './GroupResults';
+import { useTranslation } from 'react-i18next';
 
 const App: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <Container maxWidth="xl" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{ my: 4, width: '100%' }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Team Generator
+          {t('app.title')}
         </Typography>
         <CsvUploader />
         <ColumnMapper />

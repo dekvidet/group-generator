@@ -3,9 +3,11 @@ import React from 'react';
 import { useStore } from './store';
 import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, Button, Chip, ListItemText } from '@mui/material';
 import * as XLSX from 'xlsx';
+import { useTranslation } from 'react-i18next';
 
 const GroupGenerator: React.FC = () => {
   const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, groupLeaderValues, maleValues, femaleValues, targetAgeRanges, participantPairs, setParticipantPairs, generatedGroups, displayColumns, setDisplayColumns, headers } = useStore();
+  const { t } = useTranslation();
 
   const handleChange = (field: string, value: any) => {
     setGroupSettings({ [field]: value });
@@ -262,27 +264,27 @@ const GroupGenerator: React.FC = () => {
 
   return (
     <Box sx={{ marginTop: '20px' }}>
-      <Typography variant="h6">Group Generation Settings</Typography>
-      <TextField label="Size of groups" type="number" fullWidth sx={{ marginTop: '10px' }} value={groupSettings.groupSize} onChange={(e) => handleChange('groupSize', parseInt(e.target.value))} />
-      <TextField label="Minimum number of group leaders in a group" type="number" fullWidth sx={{ marginTop: '10px' }} value={groupSettings.minLeaders} onChange={(e) => handleChange('minLeaders', parseInt(e.target.value))} />
-      <TextField label="Number of rounds" type="number" fullWidth sx={{ marginTop: '10px' }} value={groupSettings.rounds} onChange={(e) => handleChange('rounds', parseInt(e.target.value))} />
+      <Typography variant="h6">{t('groupGenerator.texts.header')}</Typography>
+      <TextField label={t('groupGenerator.fields.groupSize')} type="number" fullWidth sx={{ marginTop: '10px' }} value={groupSettings.groupSize} onChange={(e) => handleChange('groupSize', parseInt(e.target.value))} />
+      <TextField label={t('groupGenerator.fields.minLeaders')} type="number" fullWidth sx={{ marginTop: '10px' }} value={groupSettings.minLeaders} onChange={(e) => handleChange('minLeaders', parseInt(e.target.value))} />
+      <TextField label={t('groupGenerator.fields.rounds')} type="number" fullWidth sx={{ marginTop: '10px' }} value={groupSettings.rounds} onChange={(e) => handleChange('rounds', parseInt(e.target.value))} />
       <FormControl fullWidth sx={{ marginTop: '10px' }}>
-        <InputLabel id="shuffle-policy-label">Shuffle Policy</InputLabel>
-        <Select labelId="shuffle-policy-label" value={groupSettings.shufflePolicy} onChange={(e) => handleChange('shufflePolicy', e.target.value)} label="Shuffle Policy">
-          <MenuItem value="unique">Unique</MenuItem>
-          <MenuItem value="random">Random</MenuItem>
+        <InputLabel id="shuffle-policy-label">{t('groupGenerator.fields.shufflePolicy')}</InputLabel>
+        <Select labelId="shuffle-policy-label" value={groupSettings.shufflePolicy} onChange={(e) => handleChange('shufflePolicy', e.target.value)} label={t('groupGenerator.fields.shufflePolicy')}>
+          <MenuItem value="unique">{t('groupGenerator.shufflePolicyOptions.unique')}</MenuItem>
+          <MenuItem value="random">{t('groupGenerator.shufflePolicyOptions.random')}</MenuItem>
         </Select>
       </FormControl>
-      <FormControlLabel control={<Checkbox checked={groupSettings.balanceGenders} onChange={(e) => handleChange('balanceGenders', e.target.checked)} />} label="Balance genders" />
-      <FormControlLabel control={<Checkbox checked={groupSettings.splitByTargetAge} onChange={(e) => handleChange('splitByTargetAge', e.target.checked)} />} label="Split by target age" />
+      <FormControlLabel control={<Checkbox checked={groupSettings.balanceGenders} onChange={(e) => handleChange('balanceGenders', e.target.checked)} />} label={t('groupGenerator.fields.balanceGenders')} />
+      <FormControlLabel control={<Checkbox checked={groupSettings.splitByTargetAge} onChange={(e) => handleChange('splitByTargetAge', e.target.checked)} />} label={t('groupGenerator.fields.splitByTargetAge')} />
       <FormControl fullWidth sx={{ marginTop: '10px' }}>
-        <InputLabel id="columns-to-display-label">Columns to Display</InputLabel>
+        <InputLabel id="columns-to-display-label">{t('groupGenerator.fields.columnsToDisplay')}</InputLabel>
         <Select
           multiple
           labelId="columns-to-display-label"
           value={displayColumns}
           onChange={(e) => setDisplayColumns(e.target.value as string[])}
-          label="Columns to Display"
+          label={t('groupGenerator.fields.columnsToDisplay')}
           renderValue={(selected) => (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {(selected as string[]).map((value) => (
@@ -300,11 +302,12 @@ const GroupGenerator: React.FC = () => {
         </Select>
       </FormControl>
       <Box sx={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-        <Button variant="contained" onClick={handleGenerateGroups}>Generate Groups</Button>
-        <Button variant="contained" onClick={handleDownload} disabled={generatedGroups.length === 0}>Download XLS</Button>
+        <Button variant="contained" onClick={handleGenerateGroups}>{t('groupGenerator.texts.generateGroups')}</Button>
+        <Button variant="contained" onClick={handleDownload} disabled={generatedGroups.length === 0}>{t('groupGenerator.texts.downloadXls')}</Button>
       </Box>
     </Box>
   );
 };
 
 export default GroupGenerator;
+
