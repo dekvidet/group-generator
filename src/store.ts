@@ -1,6 +1,24 @@
 
 import { create } from 'zustand';
 
+interface Participant {
+  id: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  age: number;
+  email: string;
+  isGroupLeader: boolean;
+  groupmateRedundancy?: number;
+}
+
+interface Group {
+  id: string;
+  participants: Participant[];
+}
+
+interface Round extends Array<Group> {}
+
 interface AppState {
   file: File | null;
   headers: string[];
@@ -10,12 +28,13 @@ interface AppState {
   participantRatios: any;
   ageGroups: any;
   groupSettings: any;
-  generatedGroups: any[];
+  generatedGroups: Round[];
   participantPairs: Set<string>;
   maleValues: string[];
   femaleValues: string[];
   groupLeaderValues: string[];
   targetAgeRanges: { from: string; to: string; name: string }[];
+  pastGroupmates: Record<string, Set<string>>;
   setFile: (file: File) => void;
   setHeaders: (headers: string[]) => void;
   setUniqueValues: (uniqueValues: Record<string, string[]>) => void;
@@ -24,7 +43,7 @@ interface AppState {
   setParticipantRatios: (participantRatios: any) => void;
   setAgeGroups: (ageGroups: any) => void;
   setGroupSettings: (groupSettings: any) => void;
-  setGeneratedGroups: (generatedGroups: any[]) => void;
+  setGeneratedGroups: (generatedGroups: Round[]) => void;
   setParticipantPairs: (participantPairs: Set<string>) => void;
   setMaleValues: (maleValues: string[]) => void;
   setFemaleValues: (femaleValues: string[]) => void;
@@ -32,7 +51,7 @@ interface AppState {
   setTargetAgeRanges: (targetAgeRanges: { from: string; to: string; name: string }[]) => void;
 }
 
-export const useStore = create<AppState>((set) => ({
+export const useStore = create<AppState>((set, get) => ({
   file: null,
   headers: [],
   uniqueValues: {},
@@ -63,6 +82,7 @@ export const useStore = create<AppState>((set) => ({
   femaleValues: [],
   groupLeaderValues: [],
   targetAgeRanges: [],
+  pastGroupmates: {},
   setFile: (file) => set({ file }),
   setHeaders: (headers) => set({ headers }),
   setUniqueValues: (uniqueValues) => set({ uniqueValues }),
@@ -71,7 +91,40 @@ export const useStore = create<AppState>((set) => ({
   setParticipantRatios: (participantRatios) => set({ participantRatios }),
   setAgeGroups: (ageGroups) => set({ ageGroups }),
   setGroupSettings: (groupSettings) => set(state => ({ groupSettings: { ...state.groupSettings, ...groupSettings } })),
-  setGeneratedGroups: (generatedGroups) => set({ generatedGroups }),
+  setGeneratedGroups: (newGeneratedGroups: Round[]) => {
+    const { pastGroupmates } = get();
+    const updatedPastGroupmates = { ...pastGroupmates };
+    const groupsWithRedundancy = newGeneratedGroups.map((round, roundIndex) => {
+      return round.map(group => {
+        const participantsWithRedundancy = group.participants.map(participant => {
+          let redundancy = 0;
+          if (roundIndex > 0) {
+            const currentParticipantPastGroupmates = updatedPastGroupmates[participant.id] || new Set();
+            group.participants.forEach(otherParticipant => {
+              if (participant.id !== otherParticipant.id && currentParticipantPastGroupmates.has(otherParticipant.id)) {
+                redundancy++;
+              }
+            });
+          }
+          return { ...participant, groupmateRedundancy: redundancy };
+        });
+
+        // Update pastGroupmates for all participants in the current group
+        participantsWithRedundancy.forEach(participant => {
+          if (!updatedPastGroupmates[participant.id]) {
+            updatedPastGroupmates[participant.id] = new Set();
+          }
+          group.participants.forEach(otherParticipant => {
+            if (participant.id !== otherParticipant.id) {
+              updatedPastGroupmates[participant.id].add(otherParticipant.id);
+            }
+          });
+        });
+        return { ...group, participants: participantsWithRedundancy };
+      });
+    });
+    set({ generatedGroups: groupsWithRedundancy, pastGroupmates: updatedPastGroupmates });
+  },
   setParticipantPairs: (participantPairs) => set({ participantPairs }),
   setMaleValues: (maleValues) => set({ maleValues }),
   setFemaleValues: (femaleValues) => set({ femaleValues }),

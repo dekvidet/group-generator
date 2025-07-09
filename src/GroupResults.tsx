@@ -28,6 +28,7 @@ const GroupResults: React.FC = () => {
                       <TableCell>Gender</TableCell>
                       <TableCell>Age</TableCell>
                       <TableCell>Email</TableCell>
+                      <TableCell>Groupmate Redundancy</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -45,6 +46,7 @@ const GroupResults: React.FC = () => {
                         <TableCell>{participant.gender}</TableCell>
                         <TableCell>{participant.age}</TableCell>
                         <TableCell>{participant.email}</TableCell>
+                        <TableCell>{participant.groupmateRedundancy}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
