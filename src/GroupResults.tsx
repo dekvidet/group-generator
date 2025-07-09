@@ -5,6 +5,12 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 const GroupResults: React.FC = () => {
   const { generatedGroups, groupLeaderValues } = useStore();
 
+  const getAverageAge = (group: any) => {
+    if (group.participants.length === 0) return 0;
+    const totalAge = group.participants.reduce((sum: number, p: any) => sum + parseInt(p.age), 0);
+    return (totalAge / group.participants.length).toFixed(1);
+  };
+
   if (generatedGroups.length === 0) {
     return null;
   }
@@ -17,7 +23,7 @@ const GroupResults: React.FC = () => {
           <Typography variant="h6">Round {roundIndex + 1}</Typography>
           {round.map((group: any) => (
             <Box key={group.id} sx={{ marginTop: '10px' }}>
-              <Typography>Group {group.id}</Typography>
+              <Typography>Group {group.id} (average age: {getAverageAge(group)})</Typography>
               <TableContainer component={Paper}>
                 <Table>
                   <TableHead>
@@ -28,6 +34,7 @@ const GroupResults: React.FC = () => {
                       <TableCell>Gender</TableCell>
                       <TableCell>Age</TableCell>
                       <TableCell>Email</TableCell>
+                      <TableCell>Target Age</TableCell>
                       <TableCell>Groupmate Redundancy</TableCell>
                     </TableRow>
                   </TableHead>
@@ -46,6 +53,7 @@ const GroupResults: React.FC = () => {
                         <TableCell>{participant.gender}</TableCell>
                         <TableCell>{participant.age}</TableCell>
                         <TableCell>{participant.email}</TableCell>
+                        <TableCell>{participant.targetAge}</TableCell>
                         <TableCell>{participant.groupmateRedundancy}</TableCell>
                       </TableRow>
                     ))}
