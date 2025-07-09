@@ -36,7 +36,7 @@ const GroupResults: React.FC = () => {
                       <TableCell>Email</TableCell>
                       <TableCell>Target Age</TableCell>
                       <TableCell>Groupmate Redundancy</TableCell>
-                      {groupSettings.splitByTargetAge && <TableCell>Age Redundancy</TableCell>}
+                      {groupSettings.splitByTargetAge && <TableCell>Unmet Target Age</TableCell>}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -56,7 +56,7 @@ const GroupResults: React.FC = () => {
                         <TableCell>{participant.email}</TableCell>
                         <TableCell>{participant.targetAge}</TableCell>
                         <TableCell>{participant.groupmateRedundancy}</TableCell>
-                        {groupSettings.splitByTargetAge && <TableCell>{participant.ageRedundancy}</TableCell>}
+                        {groupSettings.splitByTargetAge && <TableCell>{participant.unmetTargetAge}</TableCell>}
                       </TableRow>
                     ))}
                   </TableBody>

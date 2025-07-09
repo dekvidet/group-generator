@@ -10,7 +10,7 @@ interface Participant {
   email: string;
   isGroupLeader: boolean;
   groupmateRedundancy?: number;
-  ageRedundancy?: number;
+  unmetTargetAge?: number;
 }
 
 interface Group {
@@ -36,6 +36,7 @@ interface AppState {
   groupLeaderValues: string[];
   targetAgeRanges: { from: string; to: string; name: string }[];
   pastGroupmates: Record<string, Set<string>>;
+  pastUnmetTargetAge: Record<string, number>;
   setFile: (file: File) => void;
   setHeaders: (headers: string[]) => void;
   setUniqueValues: (uniqueValues: Record<string, string[]>) => void;
@@ -84,6 +85,7 @@ export const useStore = create<AppState>((set, get) => ({
   groupLeaderValues: [],
   targetAgeRanges: [],
   pastGroupmates: {},
+  pastUnmetTargetAge: {},
   setFile: (file) => set({ file }),
   setHeaders: (headers) => set({ headers }),
   setUniqueValues: (uniqueValues) => set({ uniqueValues }),
@@ -93,8 +95,9 @@ export const useStore = create<AppState>((set, get) => ({
   setAgeGroups: (ageGroups) => set({ ageGroups }),
   setGroupSettings: (groupSettings) => set(state => ({ groupSettings: { ...state.groupSettings, ...groupSettings } })),
   setGeneratedGroups: (newGeneratedGroups: Round[]) => {
-    const { pastGroupmates, groupSettings, targetAgeRanges } = get();
+    const { pastGroupmates, groupSettings, targetAgeRanges, pastUnmetTargetAge } = get();
     const updatedPastGroupmates = { ...pastGroupmates };
+    const updatedPastUnmetTargetAge = { ...pastUnmetTargetAge };
     const groupsWithRedundancy = newGeneratedGroups.map((round, roundIndex) => {
       return round.map(group => {
         const participantsWithRedundancy = group.participants.map(participant => {
@@ -108,7 +111,7 @@ export const useStore = create<AppState>((set, get) => ({
             });
           }
 
-          let ageRedundancy = 0;
+          let unmetTargetAge = 0;
           if (groupSettings.splitByTargetAge) {
             const participantTargetAgeRange = targetAgeRanges.find(range => range.name === participant.targetAge);
             if (participantTargetAgeRange) {
@@ -119,13 +122,15 @@ export const useStore = create<AppState>((set, get) => ({
                 if (participant.id !== otherParticipant.id) {
                   const otherParticipantAge = parseInt(otherParticipant.age);
                   if (otherParticipantAge < minAge || otherParticipantAge > maxAge) {
-                    ageRedundancy++;
+                    unmetTargetAge++;
                   }
                 }
               });
             }
           }
-          return { ...participant, groupmateRedundancy: redundancy, ageRedundancy };
+          const previousUnmetTargetAge = updatedPastUnmetTargetAge[participant.id] || 0;
+          updatedPastUnmetTargetAge[participant.id] = previousUnmetTargetAge + unmetTargetAge;
+          return { ...participant, groupmateRedundancy: redundancy, unmetTargetAge: updatedPastUnmetTargetAge[participant.id] };
         });
 
         // Update pastGroupmates for all participants in the current group
