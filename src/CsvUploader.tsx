@@ -38,11 +38,12 @@ const CsvUploader: React.FC = () => {
     <Box
       {...getRootProps()}
       sx={{
-        border: '2px dashed grey',
-        padding: '20px',
+        border: '3px dashed grey',
+        padding: '40px',
         textAlign: 'center',
         cursor: 'pointer',
-        backgroundColor: isDragActive ? '#f0f0f0' : 'transparent',
+        backgroundColor: isDragActive ? '#e0e0e0' : 'transparent',
+        width: '100%',
       }}
     >
       <input {...getInputProps()} />

@@ -24,7 +24,7 @@ const GroupResults: React.FC = () => {
           {round.map((group: any) => (
             <Box key={group.id} sx={{ marginTop: '10px' }}>
               <Typography>Group {group.id} (average age: {getAverageAge(group)})</Typography>
-              <TableContainer component={Paper}>
+              <TableContainer component={Paper} sx={{ width: '100%' }}>
                 <Table>
                   <TableHead>
                     <TableRow>

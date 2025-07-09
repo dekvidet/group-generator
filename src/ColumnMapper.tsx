@@ -86,7 +86,7 @@ const ColumnMapper: React.FC = () => {
       <Typography variant="h6">Map Columns</Typography>
       {Object.keys(mappedColumns).filter(field => field !== 'firstName' && field !== 'lastName' && field !== 'email').map(field => (
         <React.Fragment key={field}>
-          <FormControl fullWidth sx={{ marginTop: '10px' }}>
+          <FormControl fullWidth sx={{ marginTop: '10px', width: '100%' }}>
             <InputLabel>{field.charAt(0).toUpperCase() + field.slice(1)}</InputLabel>
             <Select value={mappedColumns[field] || ''} onChange={(e) => handleChange(field, e.target.value)}>
               {headers.map(header => (
@@ -126,7 +126,7 @@ const ColumnMapper: React.FC = () => {
             <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
               <Typography>Target Age Ranges</Typography>
               {targetAgeRanges.map((range, index) => (
-                <Box key={index} sx={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <Box key={index} sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: '10px', marginTop: '10px' }}>
                   <TextField label="From" value={range.from} onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].from = e.target.value; setTargetAgeRanges(newRanges); }} />
                   <TextField label="To" value={range.to} onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].to = e.target.value; setTargetAgeRanges(newRanges); }} />
                   <FormControl sx={{ minWidth: 120 }}>
