@@ -4,7 +4,7 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import { useTranslation } from 'react-i18next';
 
 const GroupResults: React.FC = () => {
-  const { generatedGroups, groupLeaderValues, groupSettings, displayColumns } = useStore();
+  const { generatedGroups, groupLeaderValues, groupSettings, displayColumns, mappedColumns } = useStore();
   const { t } = useTranslation();
 
   const getAverageAge = (group: any) => {
@@ -17,6 +17,8 @@ const GroupResults: React.FC = () => {
     return null;
   }
 
+  const showAverageAge = mappedColumns.age;
+
   return (
     <Box sx={{ marginTop: '20px' }}>
       <Typography variant="h6">{t('groupResults.texts.header')}</Typography>
@@ -25,7 +27,7 @@ const GroupResults: React.FC = () => {
           <Typography variant="h6">{t('groupResults.texts.round')} {roundIndex + 1}</Typography>
           {round.map((group: any) => (
             <Box key={group.id} sx={{ marginTop: '10px' }}>
-              <Typography>{t('groupResults.fields.group')} {group.id} ({t('groupResults.fields.averageAge')}: {getAverageAge(group)})</Typography>
+              <Typography>{t('groupResults.fields.group')} {group.id} {showAverageAge && `(${t('groupResults.fields.averageAge')}: ${getAverageAge(group)})`}</Typography>
               <TableContainer component={Paper} sx={{ width: '100%' }}>
                 <Table>
                   <TableHead>
