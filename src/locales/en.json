@@ -3,7 +3,7 @@
     "texts": {
       "header": "Map Columns",
       "subHeader": "Please map the columns from your CSV to the appropriate fields. The application needs to know which column in your CSV contains the following data, and in some cases, you need to specify which data in the CSV rows corresponds to the values required for that data type.",
-      "ageGroupInfo": "Only add values that represent age groups you want to filter by. Values representing age groups not added will be ignored by the system, meaning they can be placed in any team when this criterion is considered."
+      "ageGroupInfo": "Only add values that represent age groups you want to filter by. Values representing age groups not added will be ignored by the system, meaning they can be placed in any group when this criterion is considered."
     },
     "fields": {
       "id": "ID Column",
@@ -16,6 +16,11 @@
       "value": "Age Group Value",
       "addRange": "Add Age Group",
       "process": "Process"
+    },
+    "fieldValues": {
+      "male": "Values indicating males",
+      "female": "Values indicating females",
+      "isGroupLeader": "Values indicating group leadership"
     }
   },
   "csvUploader": {
@@ -35,9 +40,9 @@
       "groupSize": "Group Size",
       "minLeaders": "Minimum number of group leaders per group",
       "rounds": "Number of Rounds",
-      "shufflePolicy": "Teammate Assignment Policy",
-      "balanceGenders": "Balance Genders in Teams",
-      "splitByTargetAge": "Assign Teammates Considering Preferred Age Group",
+      "shufflePolicy": "Groupmate Assignment Policy",
+      "balanceGenders": "Balance Genders in Groups",
+      "splitByTargetAge": "Assign Groupmates Considering Preferred Age Group",
       "columnsToDisplay": "Columns to Display"
     },
     "shufflePolicyOptions": {
@@ -52,20 +57,19 @@
     },
     "fields": {
       "targetAge": "Preferred Age Group",
-      "groupmateRedundancy": "Repeating Teammates",
+      "groupmateRedundancy": "Repeating Groupmates",
       "unmetTargetAge": "Individuals Outside Preferred Age Group",
       "group": "Group",
       "averageAge": "average age"
     }
   },
   "app": {
-    "title": "Team Generator"
+    "title": "Group Generator"
   },
   "statisticsTables": {
     "texts": {
       "header": "Statistics",
       "genderDistribution": "Gender Distribution",
-      "ageDistribution": "Age Distribution",
       "groupLeaderDistribution": "Group Leader Distribution",
       "averageAge": "Average Age",
       "minAge": "Min Age",
@@ -77,7 +81,7 @@
       "nonLeader": "Non-Leader",
       "participantRatios": "Participant Ratios",
       "allParticipants": "All Participants",
-      "teamLeaders": "Team Leaders",
+      "teamLeaders": "Group Leaders",
       "total": "Total",
       "unknown": "Unknown",
       "ageGroups": "Age Groups"
