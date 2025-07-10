@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <bx:export>
+      <bx:file format="svg" href="#object-0"/>
+      <bx:file format="svg" href="#object-1" path="Untitled 2.svg"/>
+      <bx:file format="svg" href="#object-2" path="Untitled 3.svg"/>
+      <bx:file format="svg" href="#object-3" path="Untitled 4.svg"/>
+      <bx:file format="svg" href="#object-4" path="Untitled 5.svg"/>
+      <bx:file format="svg" href="#object-5" path="Untitled 6.svg"/>
+      <bx:file format="svg" href="#object-0" path="Untitled 7.svg"/>
+      <bx:file format="svg" href="#object-1" path="Untitled 8.svg"/>
+      <bx:file format="svg" href="#object-2" path="Untitled 9.svg"/>
+      <bx:file format="svg" href="#object-3" path="Untitled 10.svg"/>
+      <bx:file format="svg" href="#object-4" path="Untitled 11.svg"/>
+      <bx:file format="svg" href="#object-5" path="Untitled 12.svg"/>
+    </bx:export>
+  </defs>
+  <g>
+    <circle cx="249.655" cy="249.123" r="242.707" fill="#4285F4" style="stroke-width: 1px;" id="object-0"/>
+    <circle cx="152.571" cy="168.22" r="64.721" fill="white" style="stroke-width: 1px;" id="object-1"/>
+    <circle cx="346.738" cy="168.22" r="64.721" fill="white" style="stroke-width: 1px;" id="object-2"/>
+    <path d="M 330.136 306.855 C 330.136 242.133 376.834 242.133 376.834 306.855 L 330.136 306.855 Z" fill="white" style="stroke-width: 1px; transform-origin: 353.484px 282.567px 0px;" id="object-3" transform="matrix(0.653949, 0.756538, -0.756538, 0.653949, 0, 0)"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M 228.782 236.826 L 270.545 236.826 L 278.797 269.883 C 287.613 273.182 295.736 277.892 302.84 283.799 L 335.637 274.397 L 356.496 310.562 L 332.014 334.249 C 332.757 338.779 333.145 343.422 333.145 348.146 C 333.145 352.889 332.757 357.516 332.014 362.031 L 356.496 385.736 L 335.637 421.881 L 302.84 412.514 C 295.736 418.419 287.613 423.128 278.797 426.429 L 270.545 459.47 L 228.782 459.47 L 220.529 426.429 C 211.71 423.128 203.588 418.419 196.452 412.514 L 163.687 421.881 L 142.831 385.736 L 167.312 362.031 C 166.551 357.516 166.163 352.889 166.163 348.146 C 166.163 343.422 166.551 338.779 167.312 334.249 L 142.831 310.562 L 163.687 274.397 L 196.452 283.799 C 203.588 277.892 211.71 273.182 220.529 269.883 L 228.782 236.826 Z M 249.655 375.978 C 265.041 375.978 277.484 363.535 277.484 348.146 C 277.484 332.777 265.041 320.317 249.655 320.317 C 234.283 320.317 221.824 332.777 221.824 348.146 C 221.824 363.535 234.283 375.978 249.655 375.978 Z" fill="white" style="stroke-width: 0.625px;" id="object-4"/>
+    <path d="M 121.942 258.282 C 121.942 323.003 168.639 323.003 168.639 258.282 L 121.942 258.282 Z" fill="white" style="stroke-width: 1px; transform-origin: 145.289px 282.567px 0px;" id="object-5" transform="matrix(-0.653949, 0.756538, -0.756538, -0.653949, 0, 0)"/>
+  </g>
+</svg>

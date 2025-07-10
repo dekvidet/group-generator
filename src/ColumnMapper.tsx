@@ -1,15 +1,15 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useStore } from './store';
 import { Box, FormControl, InputLabel, Select, MenuItem, Typography, TextField, Button, Checkbox, ListItemText, Alert } from '@mui/material';
 import Papa from 'papaparse';
 import { useTranslation } from 'react-i18next';
 
 const ColumnMapper: React.FC = () => {
-  const { headers, uniqueValues, mappedColumns, setMappedColumns, setProcessedData, setParticipantRatios, setAgeGroups, file, setMaleValues, setFemaleValues, setGroupLeaderValues, setTargetAgeRanges, maleValues, femaleValues, groupLeaderValues, targetAgeRanges, displayColumns, setDisplayColumns } = useStore();
+  const { headers, uniqueValues, mappedColumns, setMappedColumns, setProcessedData, setParticipantRatios, setAgeGroups, file, setMaleValues, setFemaleValues, setGroupLeaderValues, setTargetAgeRanges, maleValues, femaleValues, groupLeaderValues, targetAgeRanges } = useStore();
   const { t } = useTranslation();
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: string | null) => {
     setMappedColumns({ [field]: value });
   };
 
@@ -18,10 +18,10 @@ const ColumnMapper: React.FC = () => {
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
-        complete: (results) => {
+        complete: (results: Papa.ParseResult<any>) => {
           console.log(results)
-          const data = (results.data as any[]).map(row => {
-            const newRow: any = {};
+          const data = results.data.slice(1).filter(row => row[mappedColumns.id as string]).map(row => {
+            const newRow: { [key: string]: any } = {};
             // Include all original CSV headers in newRow
             headers.forEach(header => {
               newRow[header] = row[header];
@@ -111,7 +111,7 @@ const ColumnMapper: React.FC = () => {
               <FormControl fullWidth>
                 <InputLabel id="male-values-label">{t('mapColumns.fieldValues.male')}</InputLabel>
                 <Select multiple value={maleValues} onChange={(e) => setMaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="male-values-label" label={t('mapColumns.fieldValues.male')}>
-                  {uniqueValues[mappedColumns.gender]?.map(value => (
+                  {uniqueValues[mappedColumns.gender as string]?.map((value: string) => (
                     <MenuItem key={value} value={value}>
                       <Checkbox checked={maleValues.indexOf(value) > -1} />
                       <ListItemText primary={value} />
@@ -122,7 +122,7 @@ const ColumnMapper: React.FC = () => {
               <FormControl fullWidth sx={{ marginTop: '10px' }}>
                 <InputLabel id="female-values-label">{t('mapColumns.fieldValues.female')}</InputLabel>
                 <Select multiple value={femaleValues} onChange={(e) => setFemaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="female-values-label" label={t('mapColumns.fieldValues.female')}>
-                  {uniqueValues[mappedColumns.gender]?.map(value => (
+                  {uniqueValues[mappedColumns.gender as string]?.map((value: string) => (
                     <MenuItem key={value} value={value}>
                       <Checkbox checked={femaleValues.indexOf(value) > -1} />
                       <ListItemText primary={value} />
@@ -150,7 +150,7 @@ const ColumnMapper: React.FC = () => {
                       onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].name = e.target.value; setTargetAgeRanges(newRanges); }}
                       label={t('mapColumns.fields.value')}
                     >
-                      {uniqueValues[mappedColumns.targetAge]?.map(value => (
+                      {uniqueValues[mappedColumns.targetAge as string]?.map((value: string) => (
                         <MenuItem key={value} value={value}>{value}</MenuItem>
                       ))}
                     </Select>
@@ -166,7 +166,7 @@ const ColumnMapper: React.FC = () => {
               <FormControl fullWidth>
                 <InputLabel id="group-leader-values-label">{t('mapColumns.fieldValues.isGroupLeader')}</InputLabel>
                 <Select multiple value={groupLeaderValues} onChange={(e) => setGroupLeaderValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="group-leader-values-label" label={t('mapColumns.fieldValues.isGroupLeader')}>
-                  {uniqueValues[mappedColumns.isGroupLeader]?.map(value => (
+                  {uniqueValues[mappedColumns.isGroupLeader as string]?.map((value: string) => (
                     <MenuItem key={value} value={value}>
                       <Checkbox checked={groupLeaderValues.indexOf(value) > -1} />
                       <ListItemText primary={value} />

@@ -16,14 +16,14 @@ const CsvUploader: React.FC = () => {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      complete: (results) => {
+      complete: (results: Papa.ParseResult<any>) => {
         const headers = results.meta.fields || [];
         setHeaders(headers);
 
         const uniqueValues: Record<string, string[]> = {};
-        headers.forEach(header => {
+        headers.forEach((header: string) => {
           const values = new Set<string>();
-          (results.data as any[]).forEach(row => {
+          results.data.forEach((row: any) => {
             if (row[header]) {
               values.add(row[header]);
             }

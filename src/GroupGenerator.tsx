@@ -5,6 +5,19 @@ import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, 
 import * as XLSX from 'xlsx';
 import { useTranslation } from 'react-i18next';
 
+interface Participant {
+  id: string;
+  gender: string;
+  age: string;
+  isGroupLeader: string;
+  targetAge?: string;
+}
+
+interface Group {
+  id: number;
+  participants: Participant[];
+}
+
 const GroupGenerator: React.FC = () => {
   const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, groupLeaderValues, maleValues, femaleValues, targetAgeRanges, participantPairs, setParticipantPairs, generatedGroups, displayColumns, setDisplayColumns, headers } = useStore();
   const { t } = useTranslation();
@@ -13,22 +26,22 @@ const GroupGenerator: React.FC = () => {
     setGroupSettings({ [field]: value });
   };
 
-  const getAverageAge = (group) => {
+  const getAverageAge = (group: Group) => {
     if (group.participants.length === 0) return 0;
-    const totalAge = group.participants.reduce((sum, p) => sum + parseInt(p.age), 0);
+    const totalAge = group.participants.reduce((sum: number, p: Participant) => sum + parseInt(p.age), 0);
     return totalAge / group.participants.length;
   };
 
   const handleGenerateGroups = () => {
     const { groupSize, rounds, minLeaders, balanceGenders, splitByTargetAge, shufflePolicy } = groupSettings;
-    const leaders = processedData.filter(p => groupLeaderValues.includes(p.isGroupLeader));
-    const nonLeaders = processedData.filter(p => !groupLeaderValues.includes(p.isGroupLeader));
+    const leaders = processedData.filter((p: Participant) => groupLeaderValues.includes(p.isGroupLeader));
+    const nonLeaders = processedData.filter((p: Participant) => !groupLeaderValues.includes(p.isGroupLeader));
 
-    const newGeneratedGroups = [];
-    let currentParticipantPairs = new Set(participantPairs);
+    const newGeneratedGroups: Group[][] = [];
+    const currentParticipantPairs = new Set<string>(participantPairs);
 
     for (let i = 0; i < rounds; i++) {
-      const roundGroups: any[] = [];
+      const roundGroups: Group[] = [];
       const numGroups = Math.ceil(processedData.length / groupSize);
 
       // Initialize groups with leaders (fixed to group ID)
@@ -82,8 +95,8 @@ const GroupGenerator: React.FC = () => {
       let availableNonLeaders = [...nonLeaders];
 
       const getBestParticipant = (
-        currentGroup: any,
-        remainingNonLeaders: any[],
+        currentGroup: Group,
+        remainingNonLeaders: Participant[],
         balanceGenders: boolean,
         splitByTargetAge: boolean,
         shufflePolicy: string,
@@ -92,14 +105,14 @@ const GroupGenerator: React.FC = () => {
         currentParticipantPairs: Set<string>,
         groupSize: number,
         targetAgeRanges: { from: string; to: string; name: string }[]
-      ) => {
+      ): Participant | null => {
         if (remainingNonLeaders.length === 0) return null;
 
         let candidates = [...remainingNonLeaders];
 
         if (splitByTargetAge) {
           const currentGroupAverageAge = getAverageAge(currentGroup);
-          const suitableCandidates = candidates.filter(p => {
+          const suitableCandidates = candidates.filter((p: Participant) => {
             const targetAgeRange = targetAgeRanges.find(range => range.name === p.targetAge);
             if (targetAgeRange) {
               const minAge = parseInt(targetAgeRange.from);
@@ -114,16 +127,16 @@ const GroupGenerator: React.FC = () => {
         }
 
         if (balanceGenders) {
-          const currentMaleCount = currentGroup.participants.filter(p => maleValues.includes(p.gender)).length;
-          const currentFemaleCount = currentGroup.participants.filter(p => femaleValues.includes(p.gender)).length;
+          const currentMaleCount = currentGroup.participants.filter((p: Participant) => maleValues.includes(p.gender)).length;
+          const currentFemaleCount = currentGroup.participants.filter((p: Participant) => femaleValues.includes(p.gender)).length;
 
           const idealMaleCount = Math.ceil(groupSize / 2);
           const idealFemaleCount = Math.floor(groupSize / 2);
 
-          let preferredGender = null;
+          let preferredGender: string | null = null;
           if (currentMaleCount < idealMaleCount && currentFemaleCount < idealFemaleCount) {
-            const malesInRemaining = candidates.filter(p => maleValues.includes(p.gender)).length;
-            const femalesInRemaining = candidates.filter(p => femaleValues.includes(p.gender)).length;
+            const malesInRemaining = candidates.filter((p: Participant) => maleValues.includes(p.gender)).length;
+            const femalesInRemaining = candidates.filter((p: Participant) => femaleValues.includes(p.gender)).length;
             if (malesInRemaining > 0 && femalesInRemaining > 0) {
               preferredGender = (malesInRemaining <= femalesInRemaining) ? 'male' : 'female';
             } else if (malesInRemaining > 0) {
@@ -138,7 +151,7 @@ const GroupGenerator: React.FC = () => {
           }
 
           if (preferredGender) {
-            const genderCandidates = candidates.filter(p =>
+            const genderCandidates = candidates.filter((p: Participant) =>
               (preferredGender === 'male' && maleValues.includes(p.gender)) ||
               (preferredGender === 'female' && femaleValues.includes(p.gender))
             );
@@ -151,12 +164,12 @@ const GroupGenerator: React.FC = () => {
         }
 
         if (shufflePolicy === 'unique') {
-          return candidates.sort((a, b) => {
+          return candidates.sort((a: Participant, b: Participant) => {
             let aConflicts = 0;
             let bConflicts = 0;
             for (const existingParticipant of currentGroup.participants) {
-              const pairKeyA = `${Math.min(a.id, existingParticipant.id)}-${Math.max(a.id, existingParticipant.id)}`;
-              const pairKeyB = `${Math.min(b.id, existingParticipant.id)}-${Math.max(b.id, existingParticipant.id)}`;
+              const pairKeyA = `${Math.min(parseInt(a.id), parseInt(existingParticipant.id))}-${Math.max(parseInt(a.id), parseInt(existingParticipant.id))}`;
+              const pairKeyB = `${Math.min(parseInt(b.id), parseInt(existingParticipant.id))}-${Math.max(parseInt(b.id), parseInt(existingParticipant.id))}`;
               if (currentParticipantPairs.has(pairKeyA)) aConflicts++;
               if (currentParticipantPairs.has(pairKeyB)) bConflicts++;
             }
@@ -202,7 +215,7 @@ const GroupGenerator: React.FC = () => {
           for (let l = k + 1; l < group.participants.length; l++) {
             const p1 = group.participants[k].id;
             const p2 = group.participants[l].id;
-            currentParticipantPairs.add(`${Math.min(p1, p2)}-${Math.max(p1, p2)}`);
+            currentParticipantPairs.add(`${Math.min(parseInt(p1), parseInt(p2))}-${Math.max(parseInt(p1), parseInt(p2))}`);
           }
         }
       });
@@ -225,11 +238,11 @@ const GroupGenerator: React.FC = () => {
       ws_data[0].push(`Round ${i + 1}`);
     }
 
-    const allParticipants = new Map(); // Map to store unique participants and their group assignments across all rounds
+    const allParticipants = new Map<string, any>(); // Map to store unique participants and their group assignments across all rounds
 
     generatedGroups.forEach((round, roundIndex) => {
-      round.forEach((group: any) => {
-        group.participants.forEach((participant: any) => {
+      round.forEach((group: Group) => {
+        group.participants.forEach((participant: Participant) => {
           if (!allParticipants.has(participant.id)) {
             allParticipants.set(participant.id, {
               isLeader: groupLeaderValues.includes(participant.isGroupLeader) ? 'X' : '',
@@ -242,7 +255,7 @@ const GroupGenerator: React.FC = () => {
       });
     });
 
-    allParticipants.forEach((value, key) => {
+    allParticipants.forEach((value, _key) => {
       const row: any[] = [];
       displayColumns.forEach(col => row.push(value.data[col]));
       row.push(value.isLeader);

@@ -4,7 +4,7 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import { useTranslation } from 'react-i18next';
 
 const StatisticsTables: React.FC = () => {
-  const { participantRatios, ageGroups, maleValues, femaleValues, mappedColumns } = useStore();
+  const { participantRatios, ageGroups, mappedColumns } = useStore();
   const { t } = useTranslation();
 
   if (!participantRatios) {

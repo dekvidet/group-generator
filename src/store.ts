@@ -4,15 +4,15 @@ import { create } from 'zustand';
 interface Participant {
   id: string;
   gender: string;
-  age: number;
-  isGroupLeader: boolean;
+  age: string;
+  isGroupLeader: string;
   groupmateRedundancy?: number;
   unmetTargetAge?: number;
   [key: string]: any; // Allow for arbitrary additional properties
 }
 
 interface Group {
-  id: string;
+  id: number;
   participants: Participant[];
 }
 

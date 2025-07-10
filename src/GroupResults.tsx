@@ -3,13 +3,28 @@ import { useStore } from './store';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
+interface Participant {
+  id: string;
+  gender: string;
+  age: string;
+  isGroupLeader: string;
+  targetAge?: string;
+  groupmateRedundancy?: number;
+  unmetTargetAge?: number;
+}
+
+interface Group {
+  id: number;
+  participants: Participant[];
+}
+
 const GroupResults: React.FC = () => {
   const { generatedGroups, groupLeaderValues, groupSettings, displayColumns, mappedColumns } = useStore();
   const { t } = useTranslation();
 
-  const getAverageAge = (group: any) => {
+  const getAverageAge = (group: Group) => {
     if (group.participants.length === 0) return 0;
-    const totalAge = group.participants.reduce((sum: number, p: any) => sum + parseInt(p.age), 0);
+    const totalAge = group.participants.reduce((sum: number, p: Participant) => sum + parseInt(p.age), 0);
     return (totalAge / group.participants.length).toFixed(1);
   };
 
@@ -25,7 +40,7 @@ const GroupResults: React.FC = () => {
       {generatedGroups.map((round, roundIndex) => (
         <Box key={roundIndex} sx={{ marginTop: '20px' }}>
           <Typography variant="h6">{t('groupResults.texts.round')} {roundIndex + 1}</Typography>
-          {round.map((group: any) => (
+          {round.map((group: Group) => (
             <Box key={group.id} sx={{ marginTop: '10px' }}>
               <Typography>{t('groupResults.fields.group')} {group.id} {showAverageAge && `(${t('groupResults.fields.averageAge')}: ${getAverageAge(group)})`}</Typography>
               <TableContainer component={Paper} sx={{ width: '100%' }}>
@@ -41,7 +56,7 @@ const GroupResults: React.FC = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {group.participants.map((participant: any) => (
+                    {group.participants.map((participant: Participant) => (
                       <TableRow
                         key={participant.id}
                         sx={{
@@ -50,7 +65,7 @@ const GroupResults: React.FC = () => {
                         }}
                       >
                         {displayColumns.map(column => (
-                          <TableCell key={column}>{participant[column]}</TableCell>
+                          <TableCell key={column}>{participant[column as keyof Participant]}</TableCell>
                         ))}
                         <TableCell>{participant.targetAge}</TableCell>
                         <TableCell>{participant.groupmateRedundancy}</TableCell>
