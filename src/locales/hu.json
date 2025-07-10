@@ -1,0 +1,90 @@
+{
+  "mapColumns": {
+    "texts": {
+      "header": "Oszlopok hozzárendelése",
+      "subHeader": "Rendeld hozzá a CSV oszlopait a megfelelő mezőkhöz. Az alkalmazásnak tudnia kell hogy az alábbi adatok at tartalmazó oszlopok a CSV mely oszlopában találhatóak, majd bizonyos esetekben meg kell adnod hogy a CSV sorainak mely adatai felelnek meg az adott adattípushoz szükséges értékekhez.",
+      "ageGroupInfo": "Csak azokat a korosztályokat jelölő értékeket add hozzá amelyek szerint szűkíteni akarsz. Hozzá nem adott korosztályt jelölő értékeket figyelmen kívül veszi a rendszer, tehát ők ezen kritérium figyelembe vételekor bármelyik csapatba kerülhetnek majd."
+    },
+    "fields": {
+      "id": "ID / Azonosító oszlopa",
+      "isGroupLeader": "Csoportvezetőség oszlopa",
+      "gender": "Nem oszlopa",
+      "age": "Életkor oszlopa",
+      "targetAge": "Preferált korosztály oszlopa",
+      "from": "Korosztályi kezdő kor (év)",
+      "to": "Korosztályi befejező kor (év)",
+      "value": "Korosztályt jelölő érték",
+      "addRange": "Korosztály hozzáadása",
+      "process": "Feldolgozás"
+    },
+    "fieldValues": {
+      "male": "Férfi nemet jelölő értékek",
+      "female": "Női nemet jelölő értékek",
+      "isGroupLeader": "Csapatvezetőséget jelölő értékek"
+    }
+  },
+  "csvUploader": {
+    "texts": {
+      "header": "CSV feltöltése",
+      "subHeader": "Először tölts fel egy CSV fájlt. Ilyen formátumhoz először alakítsd át az adataid: Excel: Fájl->Mentés másként->.CSV. Google Táblázatok: Fájl->Letöltés->Vesszővel elválasztott értékek (.csv). Google Űrlapok: Válaszok->⋮ (menü)->Válaszok letöltése (.csv).",
+      "dragAndDrop": "Húzd ide a CSV fájlt, vagy kattints a kiválasztáshoz"
+    }
+  },
+  "groupGenerator": {
+    "texts": {
+      "header": "Csoportgenerálási beállítások",
+      "downloadXls": "XLS letöltése",
+      "generateGroups": "Csoportok generálása"
+    },
+    "fields": {
+      "groupSize": "Csoportok mérete",
+      "minLeaders": "Csoportvezetők csoportonkénti minimális száma",
+      "rounds": "Körök száma",
+      "shufflePolicy": "Csapattárssorsolási technika",
+      "balanceGenders": "Nemek kiegyensúlyozása a csapatokban",
+      "splitByTargetAge": "Csapattársak sorsolása preferált korosztály figyelembe vételével",
+      "columnsToDisplay": "Megjelenítendő oszlopok"
+    },
+    "shufflePolicyOptions": {
+      "unique": "Egyedi",
+      "random": "Véletlenszerű"
+    }
+  },
+  "groupResults": {
+    "texts": {
+      "header": "Generált csoportok",
+      "round": "Kör"
+    },
+    "fields": {
+      "targetAge": "Preferált korosztály",
+      "groupmateRedundancy": "Ismétlődő csapattársak",
+      "unmetTargetAge": "Preferált korosztályon kívüli személyek",
+      "group": "Csoport",
+      "averageAge": "átlagos életkor"
+    }
+  },
+  "app": {
+    "title": "Csapatgenerátor"
+  },
+  "statisticsTables": {
+    "texts": {
+      "header": "Statisztika",
+      "genderDistribution": "Nem szerinti eloszlás",
+      "groupLeaderDistribution": "Csoportvezetői eloszlás",
+      "averageAge": "Átlagos életkor",
+      "minAge": "Minimális életkor",
+      "maxAge": "Maximális életkor",
+      "male": "Férfi",
+      "female": "Nő",
+      "other": "Egyéb",
+      "leader": "Vezető",
+      "nonLeader": "Nem vezető",
+      "participantRatios": "Résztvevői arányok",
+      "allParticipants": "Összes résztvevő",
+      "teamLeaders": "Csapatvezetők",
+      "total": "Összesen",
+      "unknown": "Ismeretlen",
+      "ageGroups": "Korcsoportok"
+    }
+  }
+}

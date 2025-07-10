@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useStore } from './store';
-import { Box, FormControl, InputLabel, Select, MenuItem, Typography, TextField, Button, Checkbox, ListItemText } from '@mui/material';
+import { Box, FormControl, InputLabel, Select, MenuItem, Typography, TextField, Button, Checkbox, ListItemText, Alert } from '@mui/material';
 import Papa from 'papaparse';
 import { useTranslation } from 'react-i18next';
 
@@ -109,8 +109,8 @@ const ColumnMapper: React.FC = () => {
           {field === 'gender' && mappedColumns.gender && (
             <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
               <FormControl fullWidth>
-                <InputLabel id="male-values-label">{t('statisticsTables.texts.male')}</InputLabel>
-                <Select multiple value={maleValues} onChange={(e) => setMaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="male-values-label" label={t('statisticsTables.texts.male')}>
+                <InputLabel id="male-values-label">{t('mapColumns.fieldValues.male')}</InputLabel>
+                <Select multiple value={maleValues} onChange={(e) => setMaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="male-values-label" label={t('mapColumns.fieldValues.male')}>
                   {uniqueValues[mappedColumns.gender]?.map(value => (
                     <MenuItem key={value} value={value}>
                       <Checkbox checked={maleValues.indexOf(value) > -1} />
@@ -120,8 +120,8 @@ const ColumnMapper: React.FC = () => {
                 </Select>
               </FormControl>
               <FormControl fullWidth sx={{ marginTop: '10px' }}>
-                <InputLabel id="female-values-label">{t('statisticsTables.texts.female')}</InputLabel>
-                <Select multiple value={femaleValues} onChange={(e) => setFemaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="female-values-label" label={t('statisticsTables.texts.female')}>
+                <InputLabel id="female-values-label">{t('mapColumns.fieldValues.female')}</InputLabel>
+                <Select multiple value={femaleValues} onChange={(e) => setFemaleValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="female-values-label" label={t('mapColumns.fieldValues.female')}>
                   {uniqueValues[mappedColumns.gender]?.map(value => (
                     <MenuItem key={value} value={value}>
                       <Checkbox checked={femaleValues.indexOf(value) > -1} />
@@ -135,18 +135,20 @@ const ColumnMapper: React.FC = () => {
 
           {field === 'targetAge' && mappedColumns.targetAge && (
             <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
-              <Typography>{t('statisticsTables.texts.ageDistribution')}</Typography>
+              <Alert variant="filled" severity="info">
+                {t('mapColumns.texts.ageGroupInfo')}
+              </Alert>
               {targetAgeRanges.map((range, index) => (
                 <Box key={index} sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: '10px', marginTop: '10px' }}>
                   <TextField label={t('mapColumns.fields.from')} value={range.from} onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].from = e.target.value; setTargetAgeRanges(newRanges); }} />
                   <TextField label={t('mapColumns.fields.to')} value={range.to} onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].to = e.target.value; setTargetAgeRanges(newRanges); }} />
-                  <FormControl sx={{ minWidth: 120 }}>
-                    <InputLabel id="target-age-name-label">{t('mapColumns.fields.name')}</InputLabel>
+                  <FormControl sx={{ minWidth: 250 }}>
+                    <InputLabel id="target-age-name-label">{t('mapColumns.fields.value')}</InputLabel>
                     <Select
                       labelId="target-age-name-label"
                       value={range.name}
                       onChange={(e) => { const newRanges = [...targetAgeRanges]; newRanges[index].name = e.target.value; setTargetAgeRanges(newRanges); }}
-                      label={t('mapColumns.fields.name')}
+                      label={t('mapColumns.fields.value')}
                     >
                       {uniqueValues[mappedColumns.targetAge]?.map(value => (
                         <MenuItem key={value} value={value}>{value}</MenuItem>
@@ -162,8 +164,8 @@ const ColumnMapper: React.FC = () => {
           {field === 'isGroupLeader' && mappedColumns.isGroupLeader && (
             <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
               <FormControl fullWidth>
-                <InputLabel id="group-leader-values-label">{t('statisticsTables.texts.groupLeaderDistribution')}</InputLabel>
-                <Select multiple value={groupLeaderValues} onChange={(e) => setGroupLeaderValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="group-leader-values-label" label={t('statisticsTables.texts.groupLeaderDistribution')}>
+                <InputLabel id="group-leader-values-label">{t('mapColumns.fieldValues.isGroupLeader')}</InputLabel>
+                <Select multiple value={groupLeaderValues} onChange={(e) => setGroupLeaderValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="group-leader-values-label" label={t('mapColumns.fieldValues.isGroupLeader')}>
                   {uniqueValues[mappedColumns.isGroupLeader]?.map(value => (
                     <MenuItem key={value} value={value}>
                       <Checkbox checked={groupLeaderValues.indexOf(value) > -1} />
