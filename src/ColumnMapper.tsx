@@ -20,7 +20,7 @@ const ColumnMapper: React.FC = () => {
         skipEmptyLines: true,
         complete: (results: Papa.ParseResult<any>) => {
           console.log(results)
-          const data = results.data.slice(1).filter(row => row[mappedColumns.id as string]).map(row => {
+          const data = results.data.filter(row => row[mappedColumns.id as string]).map(row => {
             const newRow: { [key: string]: any } = {};
             // Include all original CSV headers in newRow
             headers.forEach(header => {
