@@ -2,25 +2,26 @@
   "mapColumns": {
     "texts": {
       "header": "Map Columns",
-      "subHeader": "Please map the columns from your CSV to the appropriate fields."
+      "subHeader": "Please map the columns from your CSV to the appropriate fields. The application needs to know which column in your CSV contains the following data, and in some cases, you need to specify which data in the CSV rows corresponds to the values required for that data type.",
+      "ageGroupInfo": "Only add values that represent age groups you want to filter by. Values representing age groups not added will be ignored by the system, meaning they can be placed in any team when this criterion is considered."
     },
     "fields": {
       "id": "ID Column",
-      "isGroupLeader": "Is Group Leader Column",
+      "isGroupLeader": "Group Leader Column",
       "gender": "Gender Column",
       "age": "Age Column",
       "targetAge": "Target Age Column",
-      "from": "From",
-      "to": "To",
-      "name": "Name",
-      "addRange": "Add Range",
+      "from": "Age Group Start Age (years)",
+      "to": "Age Group End Age (years)",
+      "value": "Age Group Value",
+      "addRange": "Add Age Group",
       "process": "Process"
     }
   },
   "csvUploader": {
     "texts": {
       "header": "Upload CSV",
-      "subHeader": "Upload your CSV file to get started.",
+      "subHeader": "First, upload a CSV file. To get this format, first convert your data: Excel: File->Save As->.CSV. Google Sheets: File->Download->Comma-separated values (.csv). Google Forms: Responses->⋮ (menu)->Download responses (.csv).",
       "dragAndDrop": "Drag and drop your CSV file here, or click to select one"
     }
   },
@@ -31,12 +32,12 @@
       "generateGroups": "Generate Groups"
     },
     "fields": {
-      "groupSize": "Size of groups",
-      "minLeaders": "Minimum number of group leaders in a group",
-      "rounds": "Number of rounds",
-      "shufflePolicy": "Shuffle Policy",
-      "balanceGenders": "Balance genders",
-      "splitByTargetAge": "Split by target age",
+      "groupSize": "Group Size",
+      "minLeaders": "Minimum number of group leaders per group",
+      "rounds": "Number of Rounds",
+      "shufflePolicy": "Teammate Assignment Policy",
+      "balanceGenders": "Balance Genders in Teams",
+      "splitByTargetAge": "Assign Teammates Considering Preferred Age Group",
       "columnsToDisplay": "Columns to Display"
     },
     "shufflePolicyOptions": {
@@ -50,9 +51,9 @@
       "round": "Round"
     },
     "fields": {
-      "targetAge": "Target Age",
-      "groupmateRedundancy": "Groupmate Redundancy",
-      "unmetTargetAge": "Unmet Target Age",
+      "targetAge": "Preferred Age Group",
+      "groupmateRedundancy": "Repeating Teammates",
+      "unmetTargetAge": "Individuals Outside Preferred Age Group",
       "group": "Group",
       "averageAge": "average age"
     }
