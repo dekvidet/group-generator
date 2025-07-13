@@ -1,11 +1,7 @@
 import React from 'react';
 import { Container, Typography, Box, Tabs, Tab } from '@mui/material';
-import CsvUploader from './CsvUploader';
-import ColumnMapper from './ColumnMapper';
-import StatisticsTables from './StatisticsTables';
-import GroupGenerator from './GroupGenerator';
-import GroupResults from './GroupResults';
-import PresentPage from './PresentPage';
+import GeneratorPage from './pages/generator/GeneratorPage';
+import PresentPage from './pages/present/PresentPage';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
@@ -44,15 +40,7 @@ const AppContent: React.FC = () => {
           </Tabs>
         </Box>
         <Routes>
-          <Route path="/" element={
-            <>
-              <CsvUploader />
-              <ColumnMapper />
-              <StatisticsTables />
-              <GroupGenerator />
-              <GroupResults />
-            </>
-          } />
+          <Route path="/" element={<GeneratorPage />} />
           <Route path="/present" element={<PresentPage />} />
         </Routes>
       </Box>

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import Papa from 'papaparse';
-import { useStore } from './store';
+import { useStore } from '../../../store';
 import { useTranslation } from 'react-i18next';
-import Dropzone from './components/Dropzone';
+import Dropzone from '../../present/components/Dropzone';
 
 const CsvUploader: React.FC = () => {
   const { setFile, setHeaders, setUniqueValues } = useStore();
