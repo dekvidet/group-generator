@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useStore } from './store';
+import { useStore } from '../../../store';
 import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, Button, Chip, ListItemText } from '@mui/material';
 import * as XLSX from 'xlsx';
 import { useTranslation } from 'react-i18next';

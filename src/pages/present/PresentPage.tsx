@@ -3,7 +3,7 @@ import { Box, Typography, Button, TextField, FormControl, InputLabel, Select, Me
 import Papa from 'papaparse';
 import { useStore } from '../../store';
 import { useTranslation } from 'react-i18next';
-import Dropzone from './components/Dropzone';
+import Dropzone from '../../components/Dropzone';
 
 const PresentPage: React.FC = () => {
   const { file, setFile, headers, setHeaders, generatedGroups, setGeneratedGroups } = useStore();

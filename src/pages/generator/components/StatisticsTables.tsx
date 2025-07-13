@@ -1,5 +1,5 @@
 import React from 'react';
-import { useStore } from './store';
+import { useStore } from '../../../store';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 

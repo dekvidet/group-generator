@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useStore } from './store';
+import { useStore } from '../../../store';
 import { Box, FormControl, InputLabel, Select, MenuItem, Typography, TextField, Button, Checkbox, ListItemText, Alert } from '@mui/material';
 import Papa from 'papaparse';
 import { useTranslation } from 'react-i18next';

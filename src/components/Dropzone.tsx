@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Box, Typography, Button, Paper } from '@mui/material';
-import { useStore } from '../../../store';
+import { useStore } from '../store';
 import { useTranslation } from 'react-i18next';
 
 interface DropzoneProps {
