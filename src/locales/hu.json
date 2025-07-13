@@ -28,6 +28,9 @@
       "header": "CSV feltöltése",
       "subHeader": "Először tölts fel egy CSV fájlt. Ilyen formátumhoz először alakítsd át az adataid: Excel: Fájl->Mentés másként->.CSV. Google Táblázatok: Fájl->Letöltés->Vesszővel elválasztott értékek (.csv). Google Űrlapok: Válaszok->⋮ (menü)->Válaszok letöltése (.csv).",
       "dragAndDrop": "Húzd ide a CSV fájlt, vagy kattints a kiválasztáshoz"
+    },
+    "buttons": {
+      "reset": "Visszaállítás"
     }
   },
   "groupGenerator": {

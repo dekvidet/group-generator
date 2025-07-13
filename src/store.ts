@@ -51,6 +51,7 @@ interface AppState {
   setGroupLeaderValues: (groupLeaderValues: string[]) => void;
   setTargetAgeRanges: (targetAgeRanges: { from: string; to: string; name: string }[]) => void;
   setDisplayColumns: (displayColumns: string[]) => void;
+  reset: () => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -153,4 +154,36 @@ export const useStore = create<AppState>((set, get) => ({
   setGroupLeaderValues: (groupLeaderValues) => set({ groupLeaderValues }),
   setTargetAgeRanges: (targetAgeRanges) => set({ targetAgeRanges }),
   setDisplayColumns: (displayColumns) => set({ displayColumns }),
+  reset: () => set({
+    file: null,
+    headers: [],
+    uniqueValues: {},
+    mappedColumns: {
+      id: null,
+      gender: null,
+      age: null,
+      targetAge: null,
+      isGroupLeader: null,
+    },
+    processedData: [],
+    participantRatios: null,
+    ageGroups: null,
+    groupSettings: {
+      groupSize: 2,
+      minLeaders: 0,
+      rounds: 1,
+      shufflePolicy: 'unique',
+      balanceGenders: true,
+      splitByTargetAge: true,
+    },
+    generatedGroups: [],
+    participantPairs: new Set(),
+    maleValues: [],
+    femaleValues: [],
+    groupLeaderValues: [],
+    targetAgeRanges: [],
+    pastGroupmates: {},
+    pastUnmetTargetAge: {},
+    displayColumns: [],
+  }),
 }));

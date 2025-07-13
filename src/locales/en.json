@@ -28,6 +28,9 @@
       "header": "Upload CSV",
       "subHeader": "First, upload a CSV file. To get this format, first convert your data: Excel: File->Save As->.CSV. Google Sheets: File->Download->Comma-separated values (.csv). Google Forms: Responses->⋮ (menu)->Download responses (.csv).",
       "dragAndDrop": "Drag and drop your CSV file here, or click to select one"
+    },
+    "buttons": {
+      "reset": "Reset"
     }
   },
   "groupGenerator": {
