@@ -33,6 +33,12 @@
       "reset": "Reset"
     }
   },
+  "presentPage": {
+    "texts": {
+      "header": "Present",
+      "subHeader": "Upload a file to begin the presentation."
+    }
+  },
   "groupGenerator": {
     "texts": {
       "header": "Group Generation Settings",

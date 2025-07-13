@@ -1,16 +1,19 @@
 import React from 'react';
-import { Container, Typography, Box } from '@mui/material';
+import { Container, Typography, Box, Tabs, Tab } from '@mui/material';
 import CsvUploader from './CsvUploader';
 import ColumnMapper from './ColumnMapper';
 import StatisticsTables from './StatisticsTables';
 import GroupGenerator from './GroupGenerator';
 import GroupResults from './GroupResults';
+import PresentPage from './PresentPage';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const { t } = useTranslation();
+  const location = useLocation();
 
   const handleLanguageChange = (event: any) => {
     i18n.changeLanguage(event.target.value);
@@ -34,13 +37,34 @@ const App: React.FC = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           {t('app.title')}
         </Typography>
-        <CsvUploader />
-        <ColumnMapper />
-        <StatisticsTables />
-        <GroupGenerator />
-        <GroupResults />
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }}>
+          <Tabs value={location.pathname}>
+            <Tab label="Generator" value="/" to="/" component={Link} />
+            <Tab label="Presenter" value="/present" to="/present" component={Link} />
+          </Tabs>
+        </Box>
+        <Routes>
+          <Route path="/" element={
+            <>
+              <CsvUploader />
+              <ColumnMapper />
+              <StatisticsTables />
+              <GroupGenerator />
+              <GroupResults />
+            </>
+          } />
+          <Route path="/present" element={<PresentPage />} />
+        </Routes>
       </Box>
     </Container>
+  );
+}
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 };
 

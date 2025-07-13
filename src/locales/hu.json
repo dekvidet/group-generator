@@ -33,6 +33,12 @@
       "reset": "Visszaállítás"
     }
   },
+  "presentPage": {
+    "texts": {
+      "header": "Prezentáció",
+      "subHeader": "Töltsön fel egy fájlt a prezentáció megkezdéséhez."
+    }
+  },
   "groupGenerator": {
     "texts": {
       "header": "Csoportgenerálási beállítások",
