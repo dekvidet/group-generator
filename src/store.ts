@@ -39,8 +39,6 @@ interface AppState {
   displayColumns: string[];
   generatedIdCount: number;
   duplicateRowCount: number;
-  generatedIdCount: number;
-  duplicateRowCount: number;
   setGeneratorFile: (file: File) => void;
   setPresenterFile: (file: File) => void;
   setGeneratedIdCount: (count: number) => void;
