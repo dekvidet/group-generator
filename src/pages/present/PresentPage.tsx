@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, Typography, Button, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import Papa from 'papaparse';
 import { useStore } from '../../store';
@@ -10,6 +10,8 @@ const PresentPage: React.FC = () => {
   const { t } = useTranslation();
   const [isLive, setIsLive] = useState(false);
   const [loop, setLoop] = useState(false);
+  const [isAutoplaying, setIsAutoplaying] = useState(false);
+  const [autoplayInterval, setAutoplayInterval] = useState(3000); // Default to 3 seconds
   const [shownPlayers, setShownPlayers] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [orderBy, setOrderBy] = useState('');
@@ -102,7 +104,7 @@ const PresentPage: React.FC = () => {
     });
   };
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     const totalRows = presenterData.length || 0;
     const totalPages = Math.ceil(totalRows / shownPlayers);
     setCurrentPage((prevPage) => {
@@ -112,7 +114,21 @@ const PresentPage: React.FC = () => {
         return Math.min(prevPage + 1, totalPages);
       }
     });
-  };
+  }, [loop, presenterData.length, shownPlayers]);
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | undefined;
+    if (isAutoplaying) {
+      intervalId = setInterval(() => {
+        handleNext();
+      }, autoplayInterval);
+    }
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isAutoplaying, autoplayInterval, handleNext]);
 
   const handleOpenDisplay = () => {
     window.open('/display', '_blank');
@@ -130,6 +146,14 @@ const PresentPage: React.FC = () => {
           <Button variant="outlined" onClick={handlePrevious} disabled={!loop && currentPage === 1}>Previous</Button>
           <Button variant="outlined" onClick={handleNext} disabled={!loop && currentPage === totalPages}>Next</Button>
           <Button variant="outlined" onClick={() => setLoop(!loop)}>{loop ? 'Stop Loop' : 'Loop'}</Button>
+          <Button variant="contained" onClick={() => setIsAutoplaying(!isAutoplaying)}>{isAutoplaying ? 'Stop Autoplay' : 'Start Autoplay'}</Button>
+          <TextField
+            label="Interval (ms)"
+            type="number"
+            value={autoplayInterval}
+            onChange={(e) => setAutoplayInterval(parseInt(e.target.value, 10))}
+            sx={{ width: 150 }}
+          />
           <Typography>{currentPage}/{totalPages}</Typography>
           <TextField label="Shown players" type="number" value={shownPlayers} onChange={(e) => setShownPlayers(parseInt(e.target.value, 10))} sx={{ width: 150 }} />
               <FormControl sx={{ minWidth: 120 }}>
