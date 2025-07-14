@@ -63,6 +63,7 @@
     "texts": {
       "header": "Csoportgenerálási beállítások",
       "downloadXls": "XLS letöltése",
+      "downloadCsv": "CSV letöltése",
       "generateGroups": "Csoportok generálása",
       "groupLeaderColumn": "Csoportvezető",
       "roundHeader": "{{round}}. kör",

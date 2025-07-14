@@ -251,6 +251,7 @@ const GroupGenerator: React.FC = () => {
     const wb = XLSX.utils.book_new();
 
     const ws_data: any[][] = [[]];
+    displayColumns.forEach(col => ws_data[0].push(col));
     ws_data[0].push(t('groupGenerator.texts.groupLeaderColumn'));
 
     const maxRound = generatedGroups.length; // Total number of rounds
@@ -293,6 +294,7 @@ const GroupGenerator: React.FC = () => {
 
   const prepareDataForDownload = () => {
     const ws_data: any[][] = [[]];
+    displayColumns.forEach(col => ws_data[0].push(col));
     ws_data[0].push(t('groupGenerator.texts.groupLeaderColumn'));
 
     const maxRound = generatedGroups.length; // Total number of rounds

@@ -63,6 +63,7 @@
     "texts": {
       "header": "Group Generation Settings",
       "downloadXls": "Download XLS",
+      "downloadCsv": "Download CSV",
       "generateGroups": "Generate Groups",
       "groupLeaderColumn": "Group Leader",
       "roundHeader": "Round {{round}}",
