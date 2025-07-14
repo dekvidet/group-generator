@@ -40,6 +40,23 @@
     "texts": {
       "header": "Prezentáció",
       "subHeader": "Töltsön fel egy fájlt a prezentáció megkezdéséhez."
+    },
+    "buttons": {
+      "goLive": "Élő adás indítása",
+      "stopLive": "Élő adás leállítása",
+      "first": "Első",
+      "previous": "Előző",
+      "next": "Következő",
+      "loop": "Ismétlés",
+      "stopLoop": "Ismétlés leállítása",
+      "startAutoplay": "Automatikus lejátszás indítása",
+      "stopAutoplay": "Automatikus lejátszás leállítása",
+      "openDisplay": "Kijelző megnyitása"
+    },
+    "fields": {
+      "interval": "Intervallum (ms)",
+      "shownPlayers": "Megjelenített játékosok",
+      "orderBy": "Rendezés"
     }
   },
   "groupGenerator": {

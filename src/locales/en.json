@@ -40,6 +40,23 @@
     "texts": {
       "header": "Present",
       "subHeader": "Upload a file to begin the presentation."
+    },
+    "buttons": {
+      "goLive": "Go Live",
+      "stopLive": "Stop Live",
+      "first": "First",
+      "previous": "Previous",
+      "next": "Next",
+      "loop": "Loop",
+      "stopLoop": "Stop Loop",
+      "startAutoplay": "Start Autoplay",
+      "stopAutoplay": "Stop Autoplay",
+      "openDisplay": "Open Display"
+    },
+    "fields": {
+      "interval": "Interval (ms)",
+      "shownPlayers": "Shown players",
+      "orderBy": "Order By"
     }
   },
   "groupGenerator": {

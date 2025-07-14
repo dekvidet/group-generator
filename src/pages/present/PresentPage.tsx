@@ -141,30 +141,30 @@ const PresentPage: React.FC = () => {
       <Dropzone onDrop={onDrop} file={presenterFile} onReset={() => { setPresenterFile(null); setHeaders([]); }} />
       {presenterFile && (
         <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-          <Button variant="contained" onClick={handleGoLive} sx={{ mr: 2 }} disabled={!sharedWorker.current}>{isLive ? 'Stop Live' : 'Go Live'}</Button>
-          <Button variant="outlined" onClick={handleFirst}>First</Button>
-          <Button variant="outlined" onClick={handlePrevious} disabled={!loop && currentPage === 1}>Previous</Button>
-          <Button variant="outlined" onClick={handleNext} disabled={!loop && currentPage === totalPages}>Next</Button>
-          <Button variant="outlined" onClick={() => setLoop(!loop)}>{loop ? 'Stop Loop' : 'Loop'}</Button>
-          <Button variant="contained" onClick={() => setIsAutoplaying(!isAutoplaying)}>{isAutoplaying ? 'Stop Autoplay' : 'Start Autoplay'}</Button>
+          <Button variant="contained" onClick={handleGoLive} sx={{ mr: 2 }} disabled={!sharedWorker.current}>{isLive ? t('presentPage.buttons.stopLive') : t('presentPage.buttons.goLive')}</Button>
+          <Button variant="outlined" onClick={handleFirst}>{t('presentPage.buttons.first')}</Button>
+          <Button variant="outlined" onClick={handlePrevious} disabled={!loop && currentPage === 1}>{t('presentPage.buttons.previous')}</Button>
+          <Button variant="outlined" onClick={handleNext} disabled={!loop && currentPage === totalPages}>{t('presentPage.buttons.next')}</Button>
+          <Button variant="outlined" onClick={() => setLoop(!loop)}>{loop ? t('presentPage.buttons.stopLoop') : t('presentPage.buttons.loop')}</Button>
+          <Button variant="contained" onClick={() => setIsAutoplaying(!isAutoplaying)}>{isAutoplaying ? t('presentPage.buttons.stopAutoplay') : t('presentPage.buttons.startAutoplay')}</Button>
           <TextField
-            label="Interval (ms)"
+            label={t('presentPage.fields.interval')}
             type="number"
             value={autoplayInterval}
             onChange={(e) => setAutoplayInterval(parseInt(e.target.value, 10))}
             sx={{ width: 150 }}
           />
           <Typography>{currentPage}/{totalPages}</Typography>
-          <TextField label="Shown players" type="number" value={shownPlayers} onChange={(e) => setShownPlayers(parseInt(e.target.value, 10))} sx={{ width: 150 }} />
+          <TextField label={t('presentPage.fields.shownPlayers')} type="number" value={shownPlayers} onChange={(e) => setShownPlayers(parseInt(e.target.value, 10))} sx={{ width: 150 }} />
               <FormControl sx={{ minWidth: 120 }}>
-                  <InputLabel>Order By</InputLabel>
-                  <Select value={orderBy} label="Order By" onChange={(e) => setOrderBy(e.target.value)}>
+                  <InputLabel>{t('presentPage.fields.orderBy')}</InputLabel>
+                  <Select value={orderBy} label={t('presentPage.fields.orderBy')} onChange={(e) => setOrderBy(e.target.value)}>
                       {headers.map((header) => (
                           <MenuItem key={header} value={header}>{header}</MenuItem>
                       ))}
                   </Select>
               </FormControl>
-          <Button variant="contained" onClick={handleOpenDisplay} sx={{ mr: 2 }} disabled={presenterData.length === 0}>Open Display</Button>
+          <Button variant="contained" onClick={handleOpenDisplay} sx={{ mr: 2 }} disabled={presenterData.length === 0}>{t('presentPage.buttons.openDisplay')}</Button>
         </Box>
       )}
     </Box>
