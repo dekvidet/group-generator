@@ -52,6 +52,7 @@
       "shufflePolicy": "Groupmate Assignment Policy",
       "balanceGenders": "Balance Genders in Groups",
       "splitByTargetAge": "Assign Groupmates Considering Preferred Age Group",
+      "compulsoryGroupLeader": "Select compulsory group leader",
       "columnsToDisplay": "Columns to Display"
     },
     "shufflePolicyOptions": {

@@ -52,6 +52,7 @@
       "shufflePolicy": "Csapattárssorsolási technika",
       "balanceGenders": "Nemek kiegyensúlyozása a csapatokban",
       "splitByTargetAge": "Csapattársak sorsolása preferált korosztály figyelembe vételével",
+      "compulsoryGroupLeader": "Csoportvezető kijelölése ha nincs elég",
       "columnsToDisplay": "Megjelenítendő oszlopok"
     },
     "shufflePolicyOptions": {

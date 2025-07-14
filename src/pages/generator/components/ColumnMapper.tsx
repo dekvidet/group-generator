@@ -30,7 +30,11 @@ const ColumnMapper: React.FC = () => {
             Object.keys(mappedColumns).forEach(field => {
               const csvHeader = mappedColumns[field];
               if (csvHeader) {
-                newRow[field] = row[csvHeader];
+                if (field === 'isGroupLeader') {
+                  newRow[field] = groupLeaderValues.includes(row[csvHeader]);
+                } else {
+                  newRow[field] = row[csvHeader];
+                }
               }
             });
             return newRow;

@@ -5,7 +5,7 @@ interface Participant {
   id: string;
   gender: string;
   age: string;
-  isGroupLeader: string;
+  isGroupLeader: boolean;
   groupmateRedundancy?: number;
   unmetTargetAge?: number;
   [key: string]: any; // Allow for arbitrary additional properties
@@ -63,7 +63,7 @@ export const useStore = create<AppState>((set, get) => ({
     gender: null,
     age: null,
     targetAge: null,
-    isGroupLeader: null,
+    isGroupLeader: false,
   },
   processedData: [],
   participantRatios: null,
@@ -75,6 +75,7 @@ export const useStore = create<AppState>((set, get) => ({
     shufflePolicy: 'unique',
     balanceGenders: true,
     splitByTargetAge: true,
+    compulsoryGroupLeader: true,
   },
   generatedGroups: [],
   participantPairs: new Set(),
@@ -175,6 +176,7 @@ export const useStore = create<AppState>((set, get) => ({
       shufflePolicy: 'unique',
       balanceGenders: true,
       splitByTargetAge: true,
+      compulsoryGroupLeader: false,
     },
     generatedGroups: [],
     participantPairs: new Set(),

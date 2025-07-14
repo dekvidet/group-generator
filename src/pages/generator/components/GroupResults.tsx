@@ -7,7 +7,7 @@ interface Participant {
   id: string;
   gender: string;
   age: string;
-  isGroupLeader: string;
+  isGroupLeader: boolean;
   targetAge?: string;
   groupmateRedundancy?: number;
   unmetTargetAge?: number;
@@ -33,7 +33,7 @@ const GroupResults: React.FC = () => {
   }
 
   const showAverageAge = mappedColumns.age;
-
+console.log(generatedGroups)
   return (
     <Box sx={{ marginTop: '20px' }}>
       <Typography variant="h6">{t('groupResults.texts.header')}</Typography>
@@ -60,8 +60,8 @@ const GroupResults: React.FC = () => {
                       <TableRow
                         key={participant.id}
                         sx={{
-                          fontWeight: groupLeaderValues.includes(participant.isGroupLeader) ? 'bold' : 'normal',
-                          backgroundColor: groupLeaderValues.includes(participant.isGroupLeader) ? '#666' : 'inherit',
+                          fontWeight: participant.isGroupLeader ? 'bold' : 'normal',
+                          backgroundColor: participant.isGroupLeader ? '#666' : 'inherit',
                         }}
                       >
                         {displayColumns.map(column => (

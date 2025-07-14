@@ -9,7 +9,7 @@ interface Participant {
   id: string;
   gender: string;
   age: string;
-  isGroupLeader: string;
+  isGroupLeader: boolean;
   targetAge?: string;
 }
 
@@ -33,9 +33,29 @@ const GroupGenerator: React.FC = () => {
   };
 
   const handleGenerateGroups = () => {
-    const { groupSize, rounds, minLeaders, balanceGenders, splitByTargetAge, shufflePolicy } = groupSettings;
-    const leaders = processedData.filter((p: Participant) => groupLeaderValues.includes(p.isGroupLeader));
-    const nonLeaders = processedData.filter((p: Participant) => !groupLeaderValues.includes(p.isGroupLeader));
+    const { groupSize, rounds, minLeaders, balanceGenders, splitByTargetAge, shufflePolicy, compulsoryGroupLeader } = groupSettings;
+    let leaders = processedData.filter((p: Participant) => p.isGroupLeader);
+    let nonLeaders = processedData.filter((p: Participant) => !p.isGroupLeader);
+
+    // Compulsory group leader logic (global before rounds)
+    if (compulsoryGroupLeader) {
+      const numGroups = Math.ceil(processedData.length / groupSize);
+      const requiredLeadersCount = numGroups * minLeaders;
+
+      if (leaders.length < requiredLeadersCount) {
+        const needed = requiredLeadersCount - leaders.length;
+        for (let k = 0; k < needed; k++) {
+          if (nonLeaders.length > 0) {
+            const randomIndex = Math.floor(Math.random() * nonLeaders.length);
+            const selectedLeader = { ...nonLeaders[randomIndex], isGroupLeader: true };
+            leaders.push(selectedLeader);
+            nonLeaders.splice(randomIndex, 1); // Remove from nonLeaders
+          } else {
+            break; // No more non-leaders to promote
+          }
+        }
+      }
+    }
 
     const newGeneratedGroups: Group[][] = [];
     const currentParticipantPairs = new Set<string>(participantPairs);
@@ -245,7 +265,7 @@ const GroupGenerator: React.FC = () => {
         group.participants.forEach((participant: Participant) => {
           if (!allParticipants.has(participant.id)) {
             allParticipants.set(participant.id, {
-              isLeader: groupLeaderValues.includes(participant.isGroupLeader) ? 'X' : '',
+              isLeader: participant.isGroupLeader ? 'X' : '',
               groups: new Array(maxRound).fill(''), // Initialize with empty strings for all rounds
               data: participant
             });
@@ -290,6 +310,7 @@ const GroupGenerator: React.FC = () => {
       </FormControl>
       <FormControlLabel control={<Checkbox checked={groupSettings.balanceGenders} onChange={(e) => handleChange('balanceGenders', e.target.checked)} />} label={t('groupGenerator.fields.balanceGenders')} />
       <FormControlLabel control={<Checkbox checked={groupSettings.splitByTargetAge} onChange={(e) => handleChange('splitByTargetAge', e.target.checked)} />} label={t('groupGenerator.fields.splitByTargetAge')} />
+      <FormControlLabel control={<Checkbox checked={groupSettings.compulsoryGroupLeader} onChange={(e) => handleChange('compulsoryGroupLeader', e.target.checked)} />} label={t('groupGenerator.fields.compulsoryGroupLeader')} />
       <FormControl fullWidth sx={{ marginTop: '10px' }}>
         <InputLabel id="columns-to-display-label">{t('groupGenerator.fields.columnsToDisplay')}</InputLabel>
         <Select
