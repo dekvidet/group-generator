@@ -3,7 +3,10 @@
     "texts": {
       "header": "Oszlopok hozzárendelése",
       "subHeader": "Rendeld hozzá a CSV oszlopait a megfelelő mezőkhöz. Az alkalmazásnak tudnia kell hogy az alábbi adatokat tartalmazó oszlopok a CSV mely oszlopában találhatóak, majd bizonyos esetekben meg kell adnod hogy a CSV sorainak mely adatai felelnek meg az adott adattípushoz szükséges értékekhez.",
-      "ageGroupInfo": "Csak azokat a korosztályokat jelölő értékeket add hozzá amelyek szerint szűkíteni akarsz. Hozzá nem adott korosztályt jelölő értékeket figyelmen kívül veszi a rendszer, tehát ők ezen kritérium figyelembe vételekor bármelyik csapatba kerülhetnek majd."
+      "ageGroupInfo": "Csak azokat a korosztályokat jelölő értékeket add hozzá amelyek szerint szűkíteni akarsz. Hozzá nem adott korosztályt jelölő értékeket figyelmen kívül veszi a rendszer, tehát ők ezen kritérium figyelembe vételekor bármelyik csapatba kerülhetnek majd.",
+      "autoCorrectionWarning": "A feldolgozott adatokban a rendszer automatikusan javított hibákat:",
+      "generatedIds": "{{count}} új azonosító generálva lett üres azonosítójú sorokhoz.",
+      "removedDuplicates": "{{count}} sor eltávolítva ismétlődő azonosítók miatt."
     },
     "fields": {
       "id": "ID / Azonosító oszlopa",

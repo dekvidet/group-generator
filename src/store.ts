@@ -36,7 +36,13 @@ interface AppState {
   pastGroupmates: Record<string, Set<string>>;
   pastUnmetTargetAge: Record<string, number>;
   displayColumns: string[];
+  generatedIdCount: number;
+  duplicateRowCount: number;
+  generatedIdCount: number;
+  duplicateRowCount: number;
   setFile: (file: File) => void;
+  setGeneratedIdCount: (count: number) => void;
+  setDuplicateRowCount: (count: number) => void;
   setHeaders: (headers: string[]) => void;
   setUniqueValues: (uniqueValues: Record<string, string[]>) => void;
   setMappedColumns: (mappedColumns: Record<string, string | null>) => void;
@@ -86,7 +92,11 @@ export const useStore = create<AppState>((set, get) => ({
   pastGroupmates: {},
   pastUnmetTargetAge: {},
   displayColumns: [],
+  generatedIdCount: 0,
+  duplicateRowCount: 0,
   setFile: (file) => set({ file }),
+  setGeneratedIdCount: (count) => set({ generatedIdCount: count }),
+  setDuplicateRowCount: (count) => set({ duplicateRowCount: count }),
   setHeaders: (headers) => set({ headers }),
   setUniqueValues: (uniqueValues) => set({ uniqueValues }),
   setMappedColumns: (mappedColumns) => set(state => ({ mappedColumns: { ...state.mappedColumns, ...mappedColumns } })),

@@ -6,7 +6,7 @@ import Papa from 'papaparse';
 import { useTranslation } from 'react-i18next';
 
 const ColumnMapper: React.FC = () => {
-  const { headers, uniqueValues, mappedColumns, setMappedColumns, setProcessedData, setParticipantRatios, setAgeGroups, file, setMaleValues, setFemaleValues, setGroupLeaderValues, setTargetAgeRanges, maleValues, femaleValues, groupLeaderValues, targetAgeRanges } = useStore();
+  const { headers, uniqueValues, mappedColumns, setMappedColumns, setProcessedData, setParticipantRatios, setAgeGroups, file, setMaleValues, setFemaleValues, setGroupLeaderValues, setTargetAgeRanges, maleValues, femaleValues, groupLeaderValues, targetAgeRanges, setGeneratedIdCount, setDuplicateRowCount, generatedIdCount, duplicateRowCount } = useStore();
   const { t } = useTranslation();
 
   const handleChange = (field: string, value: string | null) => {
@@ -21,6 +21,8 @@ const ColumnMapper: React.FC = () => {
         complete: (results: Papa.ParseResult<any>) => {
           const seenIds = new Set<string>();
           let idCounter = 1;
+          let newIdCount = 0;
+          let removedRowCount = 0;
           const data: any[] = [];
 
           results.data.forEach(row => {
@@ -28,6 +30,7 @@ const ColumnMapper: React.FC = () => {
 
             if (!currentId) {
               currentId = `N/A #${idCounter++}`;
+              newIdCount++;
             }
 
             if (!seenIds.has(currentId)) {
@@ -51,9 +54,13 @@ const ColumnMapper: React.FC = () => {
               newRow.id = currentId; // Ensure the processed ID is set
               newRow[mappedColumns.id as string] = currentId
               data.push(newRow);
+            } else {
+              removedRowCount++;
             }
           });
           setProcessedData(data);
+          setGeneratedIdCount(newIdCount);
+          setDuplicateRowCount(removedRowCount);
 
           // Calculate statistics
           const participantRatios = {

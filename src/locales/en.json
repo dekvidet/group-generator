@@ -3,7 +3,10 @@
     "texts": {
       "header": "Map Columns",
       "subHeader": "Please map the columns from your CSV to the appropriate fields. The application needs to know which column in your CSV contains the following data, and in some cases, you need to specify which data in the CSV rows corresponds to the values required for that data type.",
-      "ageGroupInfo": "Only add values that represent age groups you want to filter by. Values representing age groups not added will be ignored by the system, meaning they can be placed in any group when this criterion is considered."
+      "ageGroupInfo": "Only add values that represent age groups you want to filter by. Values representing age groups not added will be ignored by the system, meaning they can be placed in any group when this criterion is considered.",
+      "autoCorrectionWarning": "There were errors in the processed data that the system auto corrected:",
+      "generatedIds": "{{count}} new IDs were generated for rows with empty IDs.",
+      "removedDuplicates": "{{count}} rows were removed due to duplicate IDs."
     },
     "fields": {
       "id": "ID Column",

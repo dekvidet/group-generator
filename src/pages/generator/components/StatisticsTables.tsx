@@ -1,10 +1,10 @@
 import React from 'react';
 import { useStore } from '../../../store';
-import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Alert } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 const StatisticsTables: React.FC = () => {
-  const { participantRatios, ageGroups, mappedColumns } = useStore();
+  const { participantRatios, ageGroups, mappedColumns, generatedIdCount, duplicateRowCount } = useStore();
   const { t } = useTranslation();
 
   if (!participantRatios) {
@@ -19,6 +19,13 @@ const StatisticsTables: React.FC = () => {
     <Box sx={{ marginTop: '20px', display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: '20px' }}>
       <Box sx={{ flexGrow: 1 }}>
         <Typography variant="h6">{t('statisticsTables.texts.participantRatios')}</Typography>
+        {(generatedIdCount > 0 || duplicateRowCount > 0) && (
+          <Alert severity="warning" sx={{ marginBottom: '20px' }}>
+            {t('mapColumns.texts.autoCorrectionWarning')}
+            {generatedIdCount > 0 && <Typography>{t('mapColumns.texts.generatedIds', { count: generatedIdCount })}</Typography>}
+            {duplicateRowCount > 0 && <Typography>{t('mapColumns.texts.removedDuplicates', { count: duplicateRowCount })}</Typography>}
+          </Alert>
+        )}
         <TableContainer component={Paper} sx={{ width: '100%' }}>
           <Table>
             <TableHead>
