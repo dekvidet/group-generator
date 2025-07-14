@@ -25,11 +25,7 @@ const DisplayPage: React.FC = () => {
   }, []);
 
   if (!displayData) {
-    return (
-      <Box sx={{ padding: '20px' }}>
-        <Typography variant="h6">Waiting for data from Presenter Page...</Typography>
-      </Box>
-    );
+    return ;
   }
 
   return (

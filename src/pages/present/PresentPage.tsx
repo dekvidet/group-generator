@@ -24,7 +24,7 @@ const PresentPage: React.FC = () => {
   }, [presenterFile, shownPlayers]);
 
   useEffect(() => {
-    if (sharedWorker.current) {
+    if (sharedWorker.current && isLive) {
       const startIndex = (currentPage - 1) * shownPlayers;
       const endIndex = startIndex + shownPlayers;
       let dataToSend = presenterData.slice(startIndex, endIndex);
@@ -42,7 +42,7 @@ const PresentPage: React.FC = () => {
         rows: dataToSend,
       });
     }
-  }, [presenterData, currentPage, shownPlayers, headers, orderBy]);
+  }, [presenterData, currentPage, shownPlayers, headers, orderBy, isLive]);
 
   useEffect(() => {
     sharedWorker.current = new SharedWorker(new URL('../sharedWorker.js', import.meta.url), {
@@ -73,7 +73,17 @@ const PresentPage: React.FC = () => {
   };
 
   const handleGoLive = () => {
-    setIsLive(!isLive);
+    setIsLive((prevIsLive) => {
+      const newIsLive = !prevIsLive;
+      if (!newIsLive && sharedWorker.current) {
+        // If going from live to not live, clear the display
+        sharedWorker.current.port.postMessage({
+          headers: [],
+          rows: [],
+        });
+      }
+      return newIsLive;
+    });
   };
 
   const handleFirst = () => {
