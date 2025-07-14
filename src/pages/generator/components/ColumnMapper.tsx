@@ -19,25 +19,39 @@ const ColumnMapper: React.FC = () => {
         header: true,
         skipEmptyLines: true,
         complete: (results: Papa.ParseResult<any>) => {
-          console.log(results)
-          const data = results.data.filter(row => row[mappedColumns.id as string]).map(row => {
-            const newRow: { [key: string]: any } = {};
-            // Include all original CSV headers in newRow
-            headers.forEach(header => {
-              newRow[header] = row[header];
-            });
-            // Then, apply the specific mappings for internal fields
-            Object.keys(mappedColumns).forEach(field => {
-              const csvHeader = mappedColumns[field];
-              if (csvHeader) {
-                if (field === 'isGroupLeader') {
-                  newRow[field] = groupLeaderValues.includes(row[csvHeader]);
-                } else {
-                  newRow[field] = row[csvHeader];
+          const seenIds = new Set<string>();
+          let idCounter = 1;
+          const data: any[] = [];
+
+          results.data.forEach(row => {
+            let currentId = row[mappedColumns.id as string]?.trim();
+
+            if (!currentId) {
+              currentId = `N/A #${idCounter++}`;
+            }
+
+            if (!seenIds.has(currentId)) {
+              seenIds.add(currentId);
+              const newRow: { [key: string]: any } = {};
+              // Include all original CSV headers in newRow
+              headers.forEach(header => {
+                newRow[header] = row[header];
+              });
+              // Then, apply the specific mappings for internal fields
+              Object.keys(mappedColumns).forEach(field => {
+                const csvHeader = mappedColumns[field];
+                if (csvHeader) {
+                  if (field === 'isGroupLeader') {
+                    newRow[field] = groupLeaderValues.includes(row[csvHeader]);
+                  } else {
+                    newRow[field] = row[csvHeader];
+                  }
                 }
-              }
-            });
-            return newRow;
+              });
+              newRow.id = currentId; // Ensure the processed ID is set
+              newRow[mappedColumns.id as string] = currentId
+              data.push(newRow);
+            }
           });
           setProcessedData(data);
 
