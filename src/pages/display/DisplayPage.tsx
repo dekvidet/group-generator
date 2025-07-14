@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, ThemeProvider, createTheme } from '@mui/material';
+import darkTheme from '../../theme';
 
 
 interface DisplayData {
@@ -9,7 +10,7 @@ interface DisplayData {
 
 const DisplayPage: React.FC = () => {
   const [displayData, setDisplayData] = useState<DisplayData | null>(null);
-  const [customTheme, setCustomTheme] = useState<any>(null);
+  const [customTheme, setCustomTheme] = useState<any>(darkTheme);
   const sharedWorker = useRef<SharedWorker | null>(null);
 
   useEffect(() => {
