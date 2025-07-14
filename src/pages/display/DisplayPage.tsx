@@ -10,7 +10,18 @@ interface DisplayData {
 
 const DisplayPage: React.FC = () => {
   const [displayData, setDisplayData] = useState<DisplayData | null>(null);
-  const [customTheme, setCustomTheme] = useState<any>(darkTheme);
+  const [customTheme, setCustomTheme] = useState<any>(() => {
+    const savedTheme = localStorage.getItem('customTheme');
+    if (savedTheme) {
+      try {
+        return createTheme(JSON.parse(savedTheme));
+      } catch (error) {
+        console.error("Error parsing saved theme from localStorage:", error);
+        return darkTheme;
+      }
+    }
+    return darkTheme;
+  });
   const sharedWorker = useRef<SharedWorker | null>(null);
 
   useEffect(() => {

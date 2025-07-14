@@ -53,7 +53,8 @@
       "startAutoplay": "Automatikus lejátszás indítása",
       "stopAutoplay": "Automatikus lejátszás leállítása",
       "openDisplay": "Kijelző megnyitása",
-      "saveCustomTheme": "Egyéni téma mentése"
+      "saveCustomTheme": "Egyéni téma mentése",
+      "resetToDefaultTheme": "Visszaállítás alapértelmezettre"
     },
     "fields": {
       "interval": "Intervallum (ms)",

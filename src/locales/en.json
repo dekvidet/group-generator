@@ -53,7 +53,8 @@
       "startAutoplay": "Start Autoplay",
       "stopAutoplay": "Stop Autoplay",
       "openDisplay": "Open Display",
-      "saveCustomTheme": "Save Custom Theme"
+      "saveCustomTheme": "Save Custom Theme",
+      "resetToDefaultTheme": "Reset to Default Theme"
     },
     "fields": {
       "interval": "Interval (ms)",

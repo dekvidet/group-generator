@@ -17,7 +17,10 @@ const PresentPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [orderBy, setOrderBy] = useState('');
   const [presenterData, setPresenterData] = useState<any[]>([]);
-  const [customThemeJson, setCustomThemeJson] = useState<string>(JSON.stringify(darkTheme, null, 2));
+  const [customThemeJson, setCustomThemeJson] = useState<string>(() => {
+    const savedTheme = localStorage.getItem('customTheme');
+    return savedTheme || JSON.stringify(darkTheme, null, 2);
+  });
   const sharedWorker = useRef<SharedWorker | null>(null);
 
   const totalRows = presenterData.length || 0;
@@ -136,6 +139,7 @@ const PresentPage: React.FC = () => {
     if (sharedWorker.current) {
       try {
         const theme = JSON.parse(customThemeJson);
+        localStorage.setItem('customTheme', customThemeJson);
         sharedWorker.current.port.postMessage({
           type: 'customTheme',
           theme: theme,
@@ -144,6 +148,17 @@ const PresentPage: React.FC = () => {
         console.error("Invalid JSON for custom theme:", error);
         alert("Invalid JSON for custom theme. Please check your input.");
       }
+    }
+  };
+
+  const handleResetCustomTheme = () => {
+    setCustomThemeJson(JSON.stringify(darkTheme, null, 2));
+    localStorage.removeItem('customTheme');
+    if (sharedWorker.current) {
+      sharedWorker.current.port.postMessage({
+        type: 'customTheme',
+        theme: darkTheme,
+      });
     }
   };
 
@@ -184,7 +199,7 @@ const PresentPage: React.FC = () => {
           <Button variant="contained" onClick={handleOpenDisplay} sx={{ mr: 2 }} disabled={presenterData.length === 0}>{t('presentPage.buttons.openDisplay')}</Button>
         </Box>
       )}
-
+      
       {presenterFile && (
         <Box sx={{ mt: 4 }}>
           <Typography variant="h6">{t('presentPage.texts.customTheme')}</Typography>
@@ -199,6 +214,9 @@ const PresentPage: React.FC = () => {
           />
           <Button variant="contained" onClick={handleSaveCustomTheme} sx={{ mt: 2 }}>
             {t('presentPage.buttons.saveCustomTheme')}
+          </Button>
+          <Button variant="outlined" onClick={handleResetCustomTheme} sx={{ mt: 2, ml: 2 }}>
+            {t('presentPage.buttons.resetToDefaultTheme')}
           </Button>
         </Box>
       )}
