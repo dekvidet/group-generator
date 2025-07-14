@@ -20,7 +20,7 @@ interface Round extends Array<Group> {}
 
 interface AppState {
   generatorFile: File | null;
-  presenterFile: File | null;
+  presenterFile: File | undefined;
   headers: string[];
   uniqueValues: Record<string, string[]>;
   mappedColumns: Record<string, string | null>;
@@ -40,7 +40,7 @@ interface AppState {
   generatedIdCount: number;
   duplicateRowCount: number;
   setGeneratorFile: (file: File) => void;
-  setPresenterFile: (file: File) => void;
+  setPresenterFile: (file: File | undefined) => void;
   setGeneratedIdCount: (count: number) => void;
   setDuplicateRowCount: (count: number) => void;
   setHeaders: (headers: string[]) => void;
@@ -62,7 +62,7 @@ interface AppState {
 
 export const useStore = create<AppState>((set, get) => ({
   generatorFile: null,
-  presenterFile: null,
+  presenterFile: undefined,
   headers: [],
   uniqueValues: {},
   mappedColumns: {
@@ -70,7 +70,7 @@ export const useStore = create<AppState>((set, get) => ({
     gender: null,
     age: null,
     targetAge: null,
-    isGroupLeader: false,
+    isGroupLeader: null,
   },
   processedData: [],
   participantRatios: null,
@@ -169,7 +169,7 @@ export const useStore = create<AppState>((set, get) => ({
   setDisplayColumns: (displayColumns) => set({ displayColumns }),
   reset: () => set({
     generatorFile: null,
-    presenterFile: null,
+    presenterFile: undefined,
     headers: [],
     uniqueValues: {},
     mappedColumns: {

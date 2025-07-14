@@ -6,7 +6,7 @@ import Papa from 'papaparse';
 import { useTranslation } from 'react-i18next';
 
 const ColumnMapper: React.FC = () => {
-  const { headers, uniqueValues, mappedColumns, setMappedColumns, setProcessedData, setParticipantRatios, setAgeGroups, generatorFile, setMaleValues, setFemaleValues, setGroupLeaderValues, setTargetAgeRanges, maleValues, femaleValues, groupLeaderValues, targetAgeRanges, setGeneratedIdCount, setDuplicateRowCount, generatedIdCount, duplicateRowCount } = useStore();
+  const { headers, uniqueValues, mappedColumns, setMappedColumns, setProcessedData, setParticipantRatios, setAgeGroups, generatorFile, setMaleValues, setFemaleValues, setGroupLeaderValues, setTargetAgeRanges, maleValues, femaleValues, groupLeaderValues, targetAgeRanges, setGeneratedIdCount, setDuplicateRowCount } = useStore();
   const { t } = useTranslation();
 
   const handleChange = (field: string, value: string | null) => {

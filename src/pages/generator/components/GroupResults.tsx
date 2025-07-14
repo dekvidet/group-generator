@@ -19,7 +19,7 @@ interface Group {
 }
 
 const GroupResults: React.FC = () => {
-  const { generatedGroups, groupLeaderValues, groupSettings, displayColumns, mappedColumns } = useStore();
+  const { generatedGroups, groupSettings, displayColumns, mappedColumns } = useStore();
   const { t } = useTranslation();
 
   const getAverageAge = (group: Group) => {
