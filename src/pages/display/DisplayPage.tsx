@@ -32,7 +32,7 @@ const DisplayPage: React.FC = () => {
     <Box sx={{ padding: '20px' }}>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
+          <TableHead sx={{ backgroundColor: '#333333' }}>
             <TableRow>
               {displayData.headers.map((header) => (
                 <TableCell key={header}><b>{header}</b></TableCell>
@@ -41,7 +41,7 @@ const DisplayPage: React.FC = () => {
           </TableHead>
           <TableBody>
             {displayData.rows.map((row, rowIndex) => (
-              <TableRow key={rowIndex}>
+              <TableRow key={rowIndex} sx={{ backgroundColor: rowIndex % 2 === 0 ? '#222222' : '#2c2c2c' }}>
                 {displayData.headers.map((header) => (
                   <TableCell key={`${rowIndex}-${header}`}>{row[header]}</TableCell>
                 ))}
