@@ -5,4 +5,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '',
   plugins: [react()],
+  worker: {
+    format: 'es',
+    rollupOptions: {
+      external: ['./src/pages/sharedWorker.js'],
+    },
+  },
 })
