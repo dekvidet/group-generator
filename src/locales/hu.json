@@ -46,7 +46,11 @@
     "texts": {
       "header": "Csoportgenerálási beállítások",
       "downloadXls": "XLS letöltése",
-      "generateGroups": "Csoportok generálása"
+      "generateGroups": "Csoportok generálása",
+      "groupLeaderColumn": "Csoportvezető",
+      "roundHeader": "{{round}}. kör",
+      "excelFileName": "csoportok.xlsx",
+      "csvFileName": "csoportok.csv"
     },
     "fields": {
       "groupSize": "Csoportok mérete",

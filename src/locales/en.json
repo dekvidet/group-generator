@@ -46,7 +46,11 @@
     "texts": {
       "header": "Group Generation Settings",
       "downloadXls": "Download XLS",
-      "generateGroups": "Generate Groups"
+      "generateGroups": "Generate Groups",
+      "groupLeaderColumn": "Group Leader",
+      "roundHeader": "Round {{round}}",
+      "excelFileName": "groups.xlsx",
+      "csvFileName": "groups.csv"
     },
     "fields": {
       "groupSize": "Group Size",

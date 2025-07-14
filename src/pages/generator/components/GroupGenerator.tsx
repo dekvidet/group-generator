@@ -251,12 +251,11 @@ const GroupGenerator: React.FC = () => {
     const wb = XLSX.utils.book_new();
 
     const ws_data: any[][] = [[]];
-    displayColumns.forEach(col => ws_data[0].push(col.charAt(0).toUpperCase() + col.slice(1)));
-    ws_data[0].push('Group Leader');
+    ws_data[0].push(t('groupGenerator.texts.groupLeaderColumn'));
 
     const maxRound = generatedGroups.length; // Total number of rounds
     for (let i = 0; i < maxRound; i++) {
-      ws_data[0].push(`Round ${i + 1}`);
+      ws_data[0].push(t('groupGenerator.texts.roundHeader', { round: i + 1 }));
     }
 
     const allParticipants = new Map<string, any>(); // Map to store unique participants and their group assignments across all rounds
@@ -289,17 +288,16 @@ const GroupGenerator: React.FC = () => {
     const ws = XLSX.utils.aoa_to_sheet(ws_data);
     XLSX.utils.book_append_sheet(wb, ws, 'All Rounds');
 
-    XLSX.writeFile(wb, 'group_results.xlsx');
+    XLSX.writeFile(wb, t('groupGenerator.texts.excelFileName'));
   };
 
   const prepareDataForDownload = () => {
     const ws_data: any[][] = [[]];
-    displayColumns.forEach(col => ws_data[0].push(col.charAt(0).toUpperCase() + col.slice(1)));
-    ws_data[0].push('Group Leader');
+    ws_data[0].push(t('groupGenerator.texts.groupLeaderColumn'));
 
     const maxRound = generatedGroups.length; // Total number of rounds
     for (let i = 0; i < maxRound; i++) {
-      ws_data[0].push(`Round ${i + 1}`);
+      ws_data[0].push(t('groupGenerator.texts.roundHeader', { round: i + 1 }));
     }
 
     const allParticipants = new Map<string, any>(); // Map to store unique participants and their group assignments across all rounds
@@ -340,7 +338,7 @@ const GroupGenerator: React.FC = () => {
     const link = document.createElement('a');
     if (link.download !== undefined) { // feature detection
       link.setAttribute('href', URL.createObjectURL(blob));
-      link.setAttribute('download', 'group_results.csv');
+      link.setAttribute('download', t('groupGenerator.texts.csvFileName'));
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
