@@ -4,6 +4,7 @@ import { useStore } from '../../../store';
 import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, Button, Chip, ListItemText } from '@mui/material';
 import * as XLSX from 'xlsx';
 import { useTranslation } from 'react-i18next';
+import Papa from 'papaparse';
 
 interface Participant {
   id: string;
@@ -291,6 +292,62 @@ const GroupGenerator: React.FC = () => {
     XLSX.writeFile(wb, 'group_results.xlsx');
   };
 
+  const prepareDataForDownload = () => {
+    const ws_data: any[][] = [[]];
+    displayColumns.forEach(col => ws_data[0].push(col.charAt(0).toUpperCase() + col.slice(1)));
+    ws_data[0].push('Group Leader');
+
+    const maxRound = generatedGroups.length; // Total number of rounds
+    for (let i = 0; i < maxRound; i++) {
+      ws_data[0].push(`Round ${i + 1}`);
+    }
+
+    const allParticipants = new Map<string, any>(); // Map to store unique participants and their group assignments across all rounds
+
+    generatedGroups.forEach((round, roundIndex) => {
+      round.forEach((group: Group) => {
+        group.participants.forEach((participant: Participant) => {
+          if (!allParticipants.has(participant.id)) {
+            allParticipants.set(participant.id, {
+              isLeader: participant.isGroupLeader ? 'X' : '',
+              groups: new Array(maxRound).fill(''), // Initialize with empty strings for all rounds
+              data: participant
+            });
+          }
+          allParticipants.get(participant.id).groups[roundIndex] = group.id;
+        });
+      });
+    });
+
+    allParticipants.forEach((value, _key) => {
+      const row: any[] = [];
+      displayColumns.forEach(col => row.push(value.data[col]));
+      row.push(value.isLeader);
+      for (let i = 0; i < maxRound; i++) {
+        row.push(value.groups[i]);
+      }
+      ws_data.push(row);
+    });
+    return ws_data;
+  };
+
+  
+
+  const handleDownloadCsv = () => {
+    const ws_data = prepareDataForDownload();
+    const csv = Papa.unparse(ws_data);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) { // feature detection
+      link.setAttribute('href', URL.createObjectURL(blob));
+      link.setAttribute('download', 'group_results.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   if (processedData.length === 0) {
     return null;
   }
@@ -338,6 +395,7 @@ const GroupGenerator: React.FC = () => {
       <Box sx={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
         <Button variant="contained" onClick={handleGenerateGroups}>{t('groupGenerator.texts.generateGroups')}</Button>
         <Button variant="contained" onClick={handleDownload} disabled={generatedGroups.length === 0}>{t('groupGenerator.texts.downloadXls')}</Button>
+        <Button variant="contained" onClick={handleDownloadCsv} disabled={generatedGroups.length === 0}>{t('groupGenerator.texts.downloadCsv')}</Button>
       </Box>
     </Box>
   );
