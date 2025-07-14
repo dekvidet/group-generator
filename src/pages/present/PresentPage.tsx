@@ -21,6 +21,7 @@ const PresentPage: React.FC = () => {
     const savedTheme = localStorage.getItem('customTheme');
     return savedTheme || JSON.stringify(darkTheme, null, 2);
   });
+  const [isJsonValid, setIsJsonValid] = useState(true);
   const sharedWorker = useRef<SharedWorker | null>(null);
 
   const totalRows = presenterData.length || 0;
@@ -209,10 +210,21 @@ const PresentPage: React.FC = () => {
             rows={10}
             fullWidth
             value={customThemeJson}
-            onChange={(e) => setCustomThemeJson(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setCustomThemeJson(value);
+              try {
+                JSON.parse(value);
+                setIsJsonValid(true);
+              } catch (error) {
+                setIsJsonValid(false);
+              }
+            }}
+            error={!isJsonValid}
+            helperText={!isJsonValid ? t('presentPage.errors.invalidJson') : ''}
             sx={{ mt: 2 }}
           />
-          <Button variant="contained" onClick={handleSaveCustomTheme} sx={{ mt: 2 }}>
+          <Button variant="contained" onClick={handleSaveCustomTheme} sx={{ mt: 2 }} disabled={!isJsonValid}>
             {t('presentPage.buttons.saveCustomTheme')}
           </Button>
           <Button variant="outlined" onClick={handleResetCustomTheme} sx={{ mt: 2, ml: 2 }}>

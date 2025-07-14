@@ -61,6 +61,9 @@
       "shownPlayers": "Megjelenített játékosok",
       "orderBy": "Rendezés",
       "customThemeJson": "Egyéni téma JSON"
+    },
+    "errors": {
+      "invalidJson": "Érvénytelen JSON formátum"
     }
   },
   "groupGenerator": {
