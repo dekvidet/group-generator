@@ -1,20 +1,21 @@
 import React from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Box, Typography, Button, Paper } from '@mui/material';
-import { useStore } from '../store';
+
 import { useTranslation } from 'react-i18next';
 
 interface DropzoneProps {
   onDrop: (acceptedFiles: File[]) => void;
+  file: File | undefined;
+  onReset: () => void;
 }
 
-const Dropzone: React.FC<DropzoneProps> = ({ onDrop }) => {
-  const { file, reset } = useStore();
+const Dropzone: React.FC<DropzoneProps> = ({ onDrop, file, onReset }) => {
   const { t } = useTranslation();
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const handleReset = () => {
-    reset();
+    onReset();
   };
 
   if (file) {

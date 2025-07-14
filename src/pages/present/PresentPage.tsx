@@ -65,7 +65,7 @@ const PresentPage: React.FC = () => {
     <Box sx={{ marginTop: '20px' }}>
       <Typography variant="h6">{t('presentPage.texts.header')}</Typography>
       <Typography variant="body2" sx={{ marginBottom: '20px' }}>{t('presentPage.texts.subHeader')}</Typography>
-      <Dropzone onDrop={onDrop} />
+      <Dropzone onDrop={onDrop} file={file} onReset={() => { setFile(null); setHeaders([]); }} />
       {file && (
         <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
           <Button variant="contained" onClick={handleGoLive} sx={{ mr: 2 }} disabled={!sharedWorker.current}>{isLive ? 'Stop Live' : 'Go Live'}</Button>
