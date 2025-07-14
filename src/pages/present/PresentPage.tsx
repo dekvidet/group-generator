@@ -24,6 +24,27 @@ const PresentPage: React.FC = () => {
   }, [presenterFile, shownPlayers]);
 
   useEffect(() => {
+    if (sharedWorker.current) {
+      const startIndex = (currentPage - 1) * shownPlayers;
+      const endIndex = startIndex + shownPlayers;
+      let dataToSend = presenterData.slice(startIndex, endIndex);
+
+      if (orderBy) {
+        dataToSend.sort((a, b) => {
+          if (a[orderBy] < b[orderBy]) return -1;
+          if (a[orderBy] > b[orderBy]) return 1;
+          return 0;
+        });
+      }
+
+      sharedWorker.current.port.postMessage({
+        headers: headers,
+        rows: dataToSend,
+      });
+    }
+  }, [presenterData, currentPage, shownPlayers, headers, orderBy]);
+
+  useEffect(() => {
     sharedWorker.current = new SharedWorker(new URL('../sharedWorker.js', import.meta.url), {
       name: 'team-generator-worker',
     });

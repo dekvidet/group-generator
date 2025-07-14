@@ -2,6 +2,7 @@ import React from 'react';
 import { Container, Typography, Box, Tabs, Tab } from '@mui/material';
 import GeneratorPage from './pages/generator/GeneratorPage';
 import PresentPage from './pages/present/PresentPage';
+import DisplayPage from './pages/display/DisplayPage';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
@@ -42,6 +43,7 @@ const AppContent: React.FC = () => {
         <Routes>
           <Route path="/" element={<GeneratorPage />} />
           <Route path="/present" element={<PresentPage />} />
+          <Route path="/display" element={<DisplayPage />} />
         </Routes>
       </Box>
     </Container>
@@ -51,9 +53,23 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <Router>
-      <AppContent />
+      <AppRouterContent />
     </Router>
   );
+};
+
+const AppRouterContent: React.FC = () => {
+  const location = useLocation();
+
+  if (location.pathname === '/display') {
+    return (
+      <Routes>
+        <Route path="/display" element={<DisplayPage />} />
+      </Routes>
+    );
+  }
+
+  return <AppContent />;
 };
 
 export default App;
