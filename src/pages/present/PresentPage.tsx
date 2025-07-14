@@ -6,13 +6,22 @@ import { useTranslation } from 'react-i18next';
 import Dropzone from '../../components/Dropzone';
 
 const PresentPage: React.FC = () => {
-  const { presenterFile, setPresenterFile, headers, setHeaders, generatedGroups, setGeneratedGroups } = useStore();
+  const { presenterFile, setPresenterFile, headers, setHeaders } = useStore();
   const { t } = useTranslation();
   const [isLive, setIsLive] = useState(false);
   const [loop, setLoop] = useState(false);
   const [shownPlayers, setShownPlayers] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
   const [orderBy, setOrderBy] = useState('');
+  const [presenterData, setPresenterData] = useState<any[]>([]);
   const sharedWorker = useRef<SharedWorker | null>(null);
+
+  const totalRows = presenterData.length || 0;
+  const totalPages = Math.ceil(totalRows / shownPlayers);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [presenterFile, shownPlayers]);
 
   useEffect(() => {
     sharedWorker.current = new SharedWorker(new URL('../sharedWorker.js', import.meta.url), {
@@ -37,9 +46,7 @@ const PresentPage: React.FC = () => {
         if (headers.length > 0) {
           setOrderBy(headers[0]);
         }
-        // Assuming the CSV is already processed and contains group information
-        // For demonstration, we'll just set the parsed data as generated groups
-        setGeneratedGroups([ { id: 1, participants: results.data } ]);
+        setPresenterData(results.data);
       },
     });
   };
@@ -49,15 +56,31 @@ const PresentPage: React.FC = () => {
   };
 
   const handleFirst = () => {
-    // Logic for first
+    setCurrentPage(1);
   };
 
   const handlePrevious = () => {
-    // Logic for previous
+    const totalRows = presenterData.length || 0;
+    const totalPages = Math.ceil(totalRows / shownPlayers);
+    setCurrentPage((prevPage) => {
+      if (loop) {
+        return prevPage === 1 ? totalPages : prevPage - 1;
+      } else {
+        return Math.max(prevPage - 1, 1);
+      }
+    });
   };
 
   const handleNext = () => {
-    // Logic for next
+    const totalRows = presenterData.length || 0;
+    const totalPages = Math.ceil(totalRows / shownPlayers);
+    setCurrentPage((prevPage) => {
+      if (loop) {
+        return (prevPage % totalPages) + 1;
+      } else {
+        return Math.min(prevPage + 1, totalPages);
+      }
+    });
   };
 
   const handleOpenDisplay = () => {
@@ -73,9 +96,10 @@ const PresentPage: React.FC = () => {
         <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
           <Button variant="contained" onClick={handleGoLive} sx={{ mr: 2 }} disabled={!sharedWorker.current}>{isLive ? 'Stop Live' : 'Go Live'}</Button>
           <Button variant="outlined" onClick={handleFirst}>First</Button>
-          <Button variant="outlined" onClick={handlePrevious}>Previous</Button>
-          <Button variant="outlined" onClick={handleNext}>Next</Button>
+          <Button variant="outlined" onClick={handlePrevious} disabled={!loop && currentPage === 1}>Previous</Button>
+          <Button variant="outlined" onClick={handleNext} disabled={!loop && currentPage === totalPages}>Next</Button>
           <Button variant="outlined" onClick={() => setLoop(!loop)}>{loop ? 'Stop Loop' : 'Loop'}</Button>
+          <Typography>{currentPage}/{totalPages}</Typography>
           <TextField label="Shown players" type="number" value={shownPlayers} onChange={(e) => setShownPlayers(parseInt(e.target.value, 10))} sx={{ width: 150 }} />
               <FormControl sx={{ minWidth: 120 }}>
                   <InputLabel>Order By</InputLabel>
@@ -85,7 +109,7 @@ const PresentPage: React.FC = () => {
                       ))}
                   </Select>
               </FormControl>
-          <Button variant="contained" onClick={handleOpenDisplay} sx={{ mr: 2 }} disabled={generatedGroups.length === 0}>Open Display</Button>
+          <Button variant="contained" onClick={handleOpenDisplay} sx={{ mr: 2 }} disabled={presenterData.length === 0}>Open Display</Button>
         </Box>
       )}
     </Box>
