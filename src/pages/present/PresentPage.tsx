@@ -131,7 +131,7 @@ const PresentPage: React.FC = () => {
   }, [isAutoplaying, autoplayInterval, handleNext]);
 
   const handleOpenDisplay = () => {
-    window.open('/display', '_blank');
+    window.open('/#/display', '_blank');
   };
 
   return (
