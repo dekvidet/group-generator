@@ -12,7 +12,7 @@ interface DropzoneProps {
 
 const Dropzone: React.FC<DropzoneProps> = ({ onDrop, file, onReset }) => {
   const { t } = useTranslation();
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'text/csv': ['.csv'] } });
 
   const handleReset = () => {
     onReset();
