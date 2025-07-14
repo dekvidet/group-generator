@@ -19,7 +19,8 @@ interface Group {
 interface Round extends Array<Group> {}
 
 interface AppState {
-  file: File | null;
+  generatorFile: File | null;
+  presenterFile: File | null;
   headers: string[];
   uniqueValues: Record<string, string[]>;
   mappedColumns: Record<string, string | null>;
@@ -40,7 +41,8 @@ interface AppState {
   duplicateRowCount: number;
   generatedIdCount: number;
   duplicateRowCount: number;
-  setFile: (file: File) => void;
+  setGeneratorFile: (file: File) => void;
+  setPresenterFile: (file: File) => void;
   setGeneratedIdCount: (count: number) => void;
   setDuplicateRowCount: (count: number) => void;
   setHeaders: (headers: string[]) => void;
@@ -61,7 +63,8 @@ interface AppState {
 }
 
 export const useStore = create<AppState>((set, get) => ({
-  file: null,
+  generatorFile: null,
+  presenterFile: null,
   headers: [],
   uniqueValues: {},
   mappedColumns: {
@@ -94,7 +97,8 @@ export const useStore = create<AppState>((set, get) => ({
   displayColumns: [],
   generatedIdCount: 0,
   duplicateRowCount: 0,
-  setFile: (file) => set({ file }),
+  setGeneratorFile: (file) => set({ generatorFile: file }),
+  setPresenterFile: (file) => set({ presenterFile: file }),
   setGeneratedIdCount: (count) => set({ generatedIdCount: count }),
   setDuplicateRowCount: (count) => set({ duplicateRowCount: count }),
   setHeaders: (headers) => set({ headers }),
@@ -166,7 +170,8 @@ export const useStore = create<AppState>((set, get) => ({
   setTargetAgeRanges: (targetAgeRanges) => set({ targetAgeRanges }),
   setDisplayColumns: (displayColumns) => set({ displayColumns }),
   reset: () => set({
-    file: null,
+    generatorFile: null,
+    presenterFile: null,
     headers: [],
     uniqueValues: {},
     mappedColumns: {

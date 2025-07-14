@@ -6,7 +6,7 @@ import Papa from 'papaparse';
 import { useTranslation } from 'react-i18next';
 
 const ColumnMapper: React.FC = () => {
-  const { headers, uniqueValues, mappedColumns, setMappedColumns, setProcessedData, setParticipantRatios, setAgeGroups, file, setMaleValues, setFemaleValues, setGroupLeaderValues, setTargetAgeRanges, maleValues, femaleValues, groupLeaderValues, targetAgeRanges, setGeneratedIdCount, setDuplicateRowCount, generatedIdCount, duplicateRowCount } = useStore();
+  const { headers, uniqueValues, mappedColumns, setMappedColumns, setProcessedData, setParticipantRatios, setAgeGroups, generatorFile, setMaleValues, setFemaleValues, setGroupLeaderValues, setTargetAgeRanges, maleValues, femaleValues, groupLeaderValues, targetAgeRanges, setGeneratedIdCount, setDuplicateRowCount, generatedIdCount, duplicateRowCount } = useStore();
   const { t } = useTranslation();
 
   const handleChange = (field: string, value: string | null) => {
@@ -14,8 +14,8 @@ const ColumnMapper: React.FC = () => {
   };
 
   const handleProcess = () => {
-    if (file) {
-      Papa.parse(file, {
+    if (generatorFile) {
+    Papa.parse(generatorFile, {
         header: true,
         skipEmptyLines: true,
         complete: (results: Papa.ParseResult<any>) => {

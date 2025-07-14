@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import Dropzone from '../../components/Dropzone';
 
 const PresentPage: React.FC = () => {
-  const { file, setFile, headers, setHeaders, generatedGroups, setGeneratedGroups } = useStore();
+  const { presenterFile, setPresenterFile, headers, setHeaders, generatedGroups, setGeneratedGroups } = useStore();
   const { t } = useTranslation();
   const [isLive, setIsLive] = useState(false);
   const [loop, setLoop] = useState(false);
@@ -26,7 +26,7 @@ const PresentPage: React.FC = () => {
 
   const onDrop = (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
-    setFile(file);
+    setPresenterFile(file);
 
     Papa.parse(file, {
       header: true,
@@ -65,8 +65,8 @@ const PresentPage: React.FC = () => {
     <Box sx={{ marginTop: '20px' }}>
       <Typography variant="h6">{t('presentPage.texts.header')}</Typography>
       <Typography variant="body2" sx={{ marginBottom: '20px' }}>{t('presentPage.texts.subHeader')}</Typography>
-      <Dropzone onDrop={onDrop} file={file} onReset={() => { setFile(null); setHeaders([]); }} />
-      {file && (
+      <Dropzone onDrop={onDrop} file={presenterFile} onReset={() => { setPresenterFile(null); setHeaders([]); }} />
+      {presenterFile && (
         <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
           <Button variant="contained" onClick={handleGoLive} sx={{ mr: 2 }} disabled={!sharedWorker.current}>{isLive ? 'Stop Live' : 'Go Live'}</Button>
           <Button variant="outlined" onClick={handleFirst}>First</Button>
