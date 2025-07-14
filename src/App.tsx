@@ -6,7 +6,7 @@ import DisplayPage from './pages/display/DisplayPage';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 
 const AppContent: React.FC = () => {
   const { t } = useTranslation();
