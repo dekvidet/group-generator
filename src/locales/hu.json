@@ -39,7 +39,8 @@
   "presentPage": {
     "texts": {
       "header": "Prezentáció",
-      "subHeader": "Töltsön fel egy fájlt a prezentáció megkezdéséhez."
+      "subHeader": "Töltsön fel egy fájlt a prezentáció megkezdéséhez.",
+      "customTheme": "Egyéni téma"
     },
     "buttons": {
       "goLive": "Élő adás indítása",
@@ -51,12 +52,14 @@
       "stopLoop": "Ismétlés leállítása",
       "startAutoplay": "Automatikus lejátszás indítása",
       "stopAutoplay": "Automatikus lejátszás leállítása",
-      "openDisplay": "Kijelző megnyitása"
+      "openDisplay": "Kijelző megnyitása",
+      "saveCustomTheme": "Egyéni téma mentése"
     },
     "fields": {
       "interval": "Intervallum (ms)",
       "shownPlayers": "Megjelenített játékosok",
-      "orderBy": "Rendezés"
+      "orderBy": "Rendezés",
+      "customThemeJson": "Egyéni téma JSON"
     }
   },
   "groupGenerator": {

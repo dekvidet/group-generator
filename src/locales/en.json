@@ -39,7 +39,8 @@
   "presentPage": {
     "texts": {
       "header": "Present",
-      "subHeader": "Upload a file to begin the presentation."
+      "subHeader": "Upload a file to begin the presentation.",
+      "customTheme": "Custom Theme"
     },
     "buttons": {
       "goLive": "Go Live",
@@ -51,12 +52,14 @@
       "stopLoop": "Stop Loop",
       "startAutoplay": "Start Autoplay",
       "stopAutoplay": "Stop Autoplay",
-      "openDisplay": "Open Display"
+      "openDisplay": "Open Display",
+      "saveCustomTheme": "Save Custom Theme"
     },
     "fields": {
       "interval": "Interval (ms)",
       "shownPlayers": "Shown players",
-      "orderBy": "Order By"
+      "orderBy": "Order By",
+      "customThemeJson": "Custom Theme JSON"
     }
   },
   "groupGenerator": {
