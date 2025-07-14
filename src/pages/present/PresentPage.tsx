@@ -34,6 +34,9 @@ const PresentPage: React.FC = () => {
       complete: (results: Papa.ParseResult<any>) => {
         const headers = results.meta.fields || [];
         setHeaders(headers);
+        if (headers.length > 0) {
+          setOrderBy(headers[0]);
+        }
         // Assuming the CSV is already processed and contains group information
         // For demonstration, we'll just set the parsed data as generated groups
         setGeneratedGroups([ { id: 1, participants: results.data } ]);
