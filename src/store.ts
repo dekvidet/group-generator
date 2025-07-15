@@ -1,5 +1,6 @@
 
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 
 interface Participant {
   id: string;
@@ -60,7 +61,7 @@ interface AppState {
   reset: () => void;
 }
 
-export const useStore = create<AppState>((set, get) => ({
+export const useStore = create<AppState>()(devtools((set, get) => ({
   generatorFile: null,
   presenterFile: undefined,
   headers: [],
@@ -201,4 +202,4 @@ export const useStore = create<AppState>((set, get) => ({
     pastUnmetTargetAge: {},
     displayColumns: [],
   }),
-}));
+}), { name: 'group-generator-storage' }))
