@@ -58,6 +58,30 @@ console.log(generatedGroups)
             </TableRow>
           </TableHead>
           <TableBody>
+            {
+              (() => {
+                const allRoundGenderRatioScores = generatedGroups.map(round => round.reduce((sum, group) => sum + (group.statistics?.genderRatioScore || 0), 0) / round.length);
+                const allRoundTargetAgeScores = generatedGroups.map(round => round.reduce((sum, group) => sum + (group.statistics?.targetAgeScore || 0), 0) / round.length);
+                const allRoundGroupmateRedundancyScores = generatedGroups.map(round => round.reduce((sum, group) => sum + (group.statistics?.groupmateRedundancyScore || 0), 0) / round.length);
+                const allRoundTotalScores = generatedGroups.map(round => round.reduce((sum, group) => sum + (group.statistics?.totalScore || 0), 0) / round.length);
+
+                const overallGenderRatioScore = allRoundGenderRatioScores.reduce((sum, score) => sum + score, 0) / allRoundGenderRatioScores.length;
+                const overallTargetAgeScore = allRoundTargetAgeScores.reduce((sum, score) => sum + score, 0) / allRoundTargetAgeScores.length;
+                const overallGroupmateRedundancyScore = allRoundGroupmateRedundancyScores.reduce((sum, score) => sum + score, 0) / allRoundGroupmateRedundancyScores.length;
+                const overallTotalScore = allRoundTotalScores.reduce((sum, score) => sum + score, 0) / allRoundTotalScores.length;
+
+                return (
+                  <TableRow sx={{ fontWeight: 'bold' }}>
+                    <TableCell>{t('groupResults.fields.total')}</TableCell>
+                    <TableCell></TableCell>
+                    <TableCell>{overallGenderRatioScore.toFixed(2)}</TableCell>
+                    <TableCell>{overallTargetAgeScore.toFixed(2)}</TableCell>
+                    <TableCell>{overallGroupmateRedundancyScore.toFixed(2)}</TableCell>
+                    <TableCell>{overallTotalScore.toFixed(2)}</TableCell>
+                  </TableRow>
+                );
+              })()
+            }
             {generatedGroups.map((round, roundIndex) => {
               const roundGenderRatioScore = round.reduce((sum, group) => sum + (group.statistics?.genderRatioScore || 0), 0) / round.length;
               const roundTargetAgeScore = round.reduce((sum, group) => sum + (group.statistics?.targetAgeScore || 0), 0) / round.length;

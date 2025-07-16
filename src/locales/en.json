@@ -107,7 +107,8 @@
       "targetAgeScore": "Target Age Score",
       "groupmateRedundancyScore": "Groupmate Redundancy Score",
       "totalScore": "Total Score",
-      "average": "Average"
+      "average": "Average",
+      "total": "Total"
     }
   },
   "app": {

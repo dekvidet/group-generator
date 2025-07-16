@@ -107,7 +107,8 @@
       "targetAgeScore": "Célkor pontszám",
       "groupmateRedundancyScore": "Csapattárs ismétlődés pontszám",
       "totalScore": "Összes pontszám",
-      "average": "Átlag"
+      "average": "Átlag",
+      "total": "Összesen"
     }
   },
   "app": {
