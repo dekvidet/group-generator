@@ -13,9 +13,17 @@ interface Participant {
   unmetTargetAge?: number;
 }
 
+interface Statistics {
+  genderRatioScore: number;
+  targetAgeScore: number;
+  groupmateRedundancyScore: number;
+  totalScore: number;
+}
+
 interface Group {
   id: number;
   participants: Participant[];
+  statistics?: Statistics;
 }
 
 const GroupResults: React.FC = () => {
@@ -37,6 +45,55 @@ console.log(generatedGroups)
   return (
     <Box sx={{ marginTop: '20px' }}>
       <Typography variant="h6">{t('groupResults.texts.header')}</Typography>
+      <TableContainer component={Paper} sx={{ width: '100%', marginBottom: '20px' }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>{t('groupResults.fields.round')}</TableCell>
+              <TableCell>{t('groupResults.fields.group')}</TableCell>
+              <TableCell>{t('groupResults.fields.genderRatioScore')}</TableCell>
+              <TableCell>{t('groupResults.fields.targetAgeScore')}</TableCell>
+              <TableCell>{t('groupResults.fields.groupmateRedundancyScore')}</TableCell>
+              <TableCell>{t('groupResults.fields.totalScore')}</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {generatedGroups.map((round, roundIndex) => {
+              const roundGenderRatioScore = round.reduce((sum, group) => sum + (group.statistics?.genderRatioScore || 0), 0) / round.length;
+              const roundTargetAgeScore = round.reduce((sum, group) => sum + (group.statistics?.targetAgeScore || 0), 0) / round.length;
+              const roundGroupmateRedundancyScore = round.reduce((sum, group) => sum + (group.statistics?.groupmateRedundancyScore || 0), 0) / round.length;
+              const roundTotalScore = round.reduce((sum, group) => sum + (group.statistics?.totalScore || 0), 0) / round.length;
+
+              return (
+                <>
+                  {round.map((group: Group, groupIndex: number) => (
+                    <TableRow key={`${roundIndex}-${group.id}`}>
+                      {groupIndex === 0 && (
+                        <TableCell rowSpan={round.length + 1} sx={{ verticalAlign: 'top' }}>
+                          {t('groupResults.texts.round')} {roundIndex + 1}
+                        </TableCell>
+                      )}
+                      <TableCell>{group.id}</TableCell>
+                      <TableCell>{(group.statistics?.genderRatioScore || 0).toFixed(2)}</TableCell>
+                      <TableCell>{(group.statistics?.targetAgeScore || 0).toFixed(2)}</TableCell>
+                      <TableCell>{(group.statistics?.groupmateRedundancyScore || 0).toFixed(2)}</TableCell>
+                      <TableCell>{(group.statistics?.totalScore || 0).toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow sx={{ fontWeight: 'bold' }}>
+                    <TableCell>{t('groupResults.fields.average')}</TableCell>
+                    <TableCell>{roundGenderRatioScore.toFixed(2)}</TableCell>
+                    <TableCell>{roundTargetAgeScore.toFixed(2)}</TableCell>
+                    <TableCell>{roundGroupmateRedundancyScore.toFixed(2)}</TableCell>
+                    <TableCell>{roundTotalScore.toFixed(2)}</TableCell>
+                  </TableRow>
+                </>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
       {generatedGroups.map((round, roundIndex) => (
         <Box key={roundIndex} sx={{ marginTop: '20px' }}>
           <Typography variant="h6">{t('groupResults.texts.round')} {roundIndex + 1}</Typography>

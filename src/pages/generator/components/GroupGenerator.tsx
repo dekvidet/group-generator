@@ -14,9 +14,17 @@ interface Participant {
   targetAge?: string;
 }
 
+interface Statistics {
+  genderRatioScore: number;
+  targetAgeScore: number;
+  groupmateRedundancyScore: number;
+  totalScore: number;
+}
+
 interface Group {
   id: number;
   participants: Participant[];
+  statistics?: Statistics;
 }
 
 const GroupGenerator: React.FC = () => {
@@ -31,6 +39,81 @@ const GroupGenerator: React.FC = () => {
     if (group.participants.length === 0) return 0;
     const totalAge = group.participants.reduce((sum: number, p: Participant) => sum + parseInt(p.age), 0);
     return totalAge / group.participants.length;
+  };
+
+  const calculateGenderRatioScore = (group: Group, maleValues: string[], femaleValues: string[], totalMaleCount: number, totalFemaleCount: number): number => {
+    if (group.participants.length === 0) return 0;
+
+    const groupMaleCount = group.participants.filter(p => maleValues.includes(p.gender)).length;
+    const groupFemaleCount = group.participants.filter(p => femaleValues.includes(p.gender)).length;
+
+    const totalParticipants = totalMaleCount + totalFemaleCount;
+    if (totalParticipants === 0) return 1; // No participants, perfect ratio
+
+    const overallMaleRatio = totalMaleCount / totalParticipants;
+    const overallFemaleRatio = totalFemaleCount / totalParticipants;
+
+    const groupTotal = groupMaleCount + groupFemaleCount;
+    if (groupTotal === 0) return 0; // No participants in group, cannot calculate ratio
+
+    const groupMaleRatio = groupMaleCount / groupTotal;
+    const groupFemaleRatio = groupFemaleCount / groupTotal;
+
+    const maleRatioDifference = Math.abs(groupMaleRatio - overallMaleRatio);
+    const femaleRatioDifference = Math.abs(groupFemaleRatio - overallFemaleRatio);
+
+    // The closer the difference is to 0, the better. Max difference is 1.
+    // So, 1 - difference gives a score where 1 is best and 0 is worst.
+    return 1 - ((maleRatioDifference + femaleRatioDifference) / 2);
+  };
+
+  const calculateTargetAgeScore = (group: Group): number => {
+    if (group.participants.length === 0) return 0;
+
+    let achievedCount = 0;
+    group.participants.forEach(participant => {
+      if (participant.targetAge) {
+        const targetAgeRange = targetAgeRanges.find(range => range.name === participant.targetAge);
+        if (targetAgeRange) {
+          const minAge = parseInt(targetAgeRange.from);
+          const maxAge = parseInt(targetAgeRange.to);
+          const groupmatesMeetingTarget = group.participants.filter(p => {
+            const age = parseInt(p.age);
+            return p.id !== participant.id && age >= minAge && age <= maxAge;
+          }).length;
+          if (groupmatesMeetingTarget > 0) {
+            achievedCount++;
+          }
+        }
+      }
+    });
+
+    return achievedCount / group.participants.length;
+  };
+
+  const calculateGroupmateRedundancyScore = (group: Group, allParticipantPairs: Set<string>): number => {
+    if (group.participants.length === 0) return 0;
+
+    let nonRepeatingCount = 0;
+    group.participants.forEach(participant => {
+      let participantNonRepeatingCount = 0;
+      for (let i = 0; i < group.participants.length; i++) {
+        const groupmate = group.participants[i];
+        if (participant.id !== groupmate.id) {
+          const pairKey = `${Math.min(parseInt(participant.id), parseInt(groupmate.id))}-${Math.max(parseInt(participant.id), parseInt(groupmate.id))}`;
+          if (!allParticipantPairs.has(pairKey)) {
+            participantNonRepeatingCount++;
+          }
+        }
+      }
+      // If a participant has no groupmates (group size 1), or no non-repeating groupmates, their score for this metric is 0.
+      // Otherwise, it's the ratio of non-repeating groupmates to total possible groupmates (group.participants.length - 1).
+      if (group.participants.length > 1) {
+        nonRepeatingCount += (participantNonRepeatingCount / (group.participants.length - 1));
+      }
+    });
+
+    return nonRepeatingCount / group.participants.length;
   };
 
   const handleGenerateGroups = () => {
@@ -239,6 +322,25 @@ const GroupGenerator: React.FC = () => {
             currentParticipantPairs.add(`${Math.min(parseInt(p1), parseInt(p2))}-${Math.max(parseInt(p1), parseInt(p2))}`);
           }
         }
+      });
+
+      // Calculate statistics for each group in the current round
+      const totalMaleCount = processedData.filter(p => maleValues.includes(p.gender)).length;
+      const totalFemaleCount = processedData.filter(p => femaleValues.includes(p.gender)).length;
+
+      roundGroups.forEach(group => {
+        const genderRatioScore = calculateGenderRatioScore(group, maleValues, femaleValues, totalMaleCount, totalFemaleCount);
+        const targetAgeScore = calculateTargetAgeScore(group);
+        const groupmateRedundancyScore = calculateGroupmateRedundancyScore(group, currentParticipantPairs);
+
+        const totalScore = (genderRatioScore + targetAgeScore + groupmateRedundancyScore) / 3;
+
+        group.statistics = {
+          genderRatioScore,
+          targetAgeScore,
+          groupmateRedundancyScore,
+          totalScore,
+        };
       });
 
       newGeneratedGroups.push(roundGroups);

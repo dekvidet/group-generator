@@ -102,7 +102,12 @@
       "groupmateRedundancy": "Ismétlődő csapattársak",
       "unmetTargetAge": "Preferált korosztályon kívüli személyek",
       "group": "Csoport",
-      "averageAge": "átlagos életkor"
+      "averageAge": "átlagos életkor",
+      "genderRatioScore": "Nem arány pontszám",
+      "targetAgeScore": "Célkor pontszám",
+      "groupmateRedundancyScore": "Csapattárs ismétlődés pontszám",
+      "totalScore": "Összes pontszám",
+      "average": "Átlag"
     }
   },
   "app": {

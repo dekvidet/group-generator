@@ -102,7 +102,12 @@
       "groupmateRedundancy": "Repeating Groupmates",
       "unmetTargetAge": "Individuals Outside Preferred Age Group",
       "group": "Group",
-      "averageAge": "average age"
+      "averageAge": "average age",
+      "genderRatioScore": "Gender Ratio Score",
+      "targetAgeScore": "Target Age Score",
+      "groupmateRedundancyScore": "Groupmate Redundancy Score",
+      "totalScore": "Total Score",
+      "average": "Average"
     }
   },
   "app": {
