@@ -70,15 +70,30 @@ console.log(generatedGroups)
                 const overallGroupmateRedundancyScore = allRoundGroupmateRedundancyScores.reduce((sum, score) => sum + score, 0) / allRoundGroupmateRedundancyScores.length;
                 const overallTotalScore = allRoundTotalScores.reduce((sum, score) => sum + score, 0) / allRoundTotalScores.length;
 
+                const overallWorstGenderRatioScore = Math.min(...generatedGroups.flatMap(round => round.map(group => group.statistics?.genderRatioScore || 0)));
+                const overallWorstTargetAgeScore = Math.min(...generatedGroups.flatMap(round => round.map(group => group.statistics?.targetAgeScore || 0)));
+                const overallWorstGroupmateRedundancyScore = Math.min(...generatedGroups.flatMap(round => round.map(group => group.statistics?.groupmateRedundancyScore || 0)));
+                const overallWorstTotalScore = Math.min(...generatedGroups.flatMap(round => round.map(group => group.statistics?.totalScore || 0)));
+
                 return (
-                  <TableRow sx={{ fontWeight: 'bold' }}>
-                    <TableCell>{t('groupResults.fields.total')}</TableCell>
-                    <TableCell></TableCell>
-                    <TableCell>{overallGenderRatioScore.toFixed(2)}</TableCell>
-                    <TableCell>{overallTargetAgeScore.toFixed(2)}</TableCell>
-                    <TableCell>{overallGroupmateRedundancyScore.toFixed(2)}</TableCell>
-                    <TableCell>{overallTotalScore.toFixed(2)}</TableCell>
-                  </TableRow>
+                  <>
+                    <TableRow sx={{ fontWeight: 'bold' }}>
+                      <TableCell>{t('groupResults.fields.average')}</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell>{overallGenderRatioScore.toFixed(2)}</TableCell>
+                      <TableCell>{overallTargetAgeScore.toFixed(2)}</TableCell>
+                      <TableCell>{overallGroupmateRedundancyScore.toFixed(2)}</TableCell>
+                      <TableCell>{overallTotalScore.toFixed(2)}</TableCell>
+                    </TableRow>
+                    <TableRow sx={{ fontWeight: 'bold' }}>
+                      <TableCell>{t('groupResults.fields.worst')}</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell>{overallWorstGenderRatioScore.toFixed(2)}</TableCell>
+                      <TableCell>{overallWorstTargetAgeScore.toFixed(2)}</TableCell>
+                      <TableCell>{overallWorstGroupmateRedundancyScore.toFixed(2)}</TableCell>
+                      <TableCell>{overallWorstTotalScore.toFixed(2)}</TableCell>
+                    </TableRow>
+                  </>
                 );
               })()
             }
@@ -88,12 +103,17 @@ console.log(generatedGroups)
               const roundGroupmateRedundancyScore = round.reduce((sum, group) => sum + (group.statistics?.groupmateRedundancyScore || 0), 0) / round.length;
               const roundTotalScore = round.reduce((sum, group) => sum + (group.statistics?.totalScore || 0), 0) / round.length;
 
+              const roundWorstGenderRatioScore = Math.min(...round.map(group => group.statistics?.genderRatioScore || 0));
+              const roundWorstTargetAgeScore = Math.min(...round.map(group => group.statistics?.targetAgeScore || 0));
+              const roundWorstGroupmateRedundancyScore = Math.min(...round.map(group => group.statistics?.groupmateRedundancyScore || 0));
+              const roundWorstTotalScore = Math.min(...round.map(group => group.statistics?.totalScore || 0));
+
               return (
                 <>
                   {round.map((group: Group, groupIndex: number) => (
                     <TableRow key={`${roundIndex}-${group.id}`}>
                       {groupIndex === 0 && (
-                        <TableCell rowSpan={round.length + 1} sx={{ verticalAlign: 'top' }}>
+                        <TableCell rowSpan={round.length + 2} sx={{ verticalAlign: 'top' }}>
                           {t('groupResults.texts.round')} {roundIndex + 1}
                         </TableCell>
                       )}
@@ -110,6 +130,13 @@ console.log(generatedGroups)
                     <TableCell>{roundTargetAgeScore.toFixed(2)}</TableCell>
                     <TableCell>{roundGroupmateRedundancyScore.toFixed(2)}</TableCell>
                     <TableCell>{roundTotalScore.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow sx={{ fontWeight: 'bold' }}>
+                    <TableCell>{t('groupResults.fields.worst')}</TableCell>
+                    <TableCell>{roundWorstGenderRatioScore.toFixed(2)}</TableCell>
+                    <TableCell>{roundWorstTargetAgeScore.toFixed(2)}</TableCell>
+                    <TableCell>{roundWorstGroupmateRedundancyScore.toFixed(2)}</TableCell>
+                    <TableCell>{roundWorstTotalScore.toFixed(2)}</TableCell>
                   </TableRow>
                 </>
               );

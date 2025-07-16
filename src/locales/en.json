@@ -108,7 +108,8 @@
       "groupmateRedundancyScore": "Groupmate Redundancy Score",
       "totalScore": "Total Score",
       "average": "Average",
-      "total": "Total"
+      "total": "Total",
+      "worst": "Worst"
     }
   },
   "app": {

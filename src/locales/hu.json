@@ -108,7 +108,8 @@
       "groupmateRedundancyScore": "Csapattárs ismétlődés pontszám",
       "totalScore": "Összes pontszám",
       "average": "Átlag",
-      "total": "Összesen"
+      "total": "Összesen",
+      "worst": "Legrosszabb"
     }
   },
   "app": {
