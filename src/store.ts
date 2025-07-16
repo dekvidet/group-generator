@@ -20,26 +20,35 @@ interface Group {
 interface Round extends Array<Group> {}
 
 interface AppState {
+  //CsvUploader
   generatorFile: File | null;
   presenterFile: File | undefined;
   headers: string[];
   uniqueValues: Record<string, string[]>;
+
+  //CsvProcessor
   mappedColumns: Record<string, string | null>;
-  processedData: any[];
-  participantRatios: any;
-  ageGroups: any;
-  groupSettings: any;
-  generatedGroups: Round[];
-  participantPairs: Set<string>;
   maleValues: string[];
   femaleValues: string[];
-  groupLeaderValues: string[];
   targetAgeRanges: { from: string; to: string; name: string }[];
-  pastGroupmates: Record<string, Set<string>>;
-  pastUnmetTargetAge: Record<string, number>;
-  displayColumns: string[];
+  groupLeaderValues: string[];
+  processedData: any[];
+  
+  //Statistics
   generatedIdCount: number;
   duplicateRowCount: number;
+  ageGroups: any;
+  participantRatios: any;
+  
+  //GroupGenerator
+  groupSettings: any;
+  generatedGroups: Round[];
+  displayColumns: string[];
+  
+  participantPairs: Set<string>;
+  pastGroupmates: Record<string, Set<string>>;
+  pastUnmetTargetAge: Record<string, number>;
+  
   setGeneratorFile: (file: File) => void;
   setPresenterFile: (file: File | undefined) => void;
   setGeneratedIdCount: (count: number) => void;
