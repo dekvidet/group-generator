@@ -97,6 +97,10 @@
       "header": "Generált csoportok",
       "round": "Kör"
     },
+    "buttons": {
+      "showStatistics": "Statisztika mutatása",
+      "hideStatistics": "Statisztika elrejtése"
+    },
     "fields": {
       "targetAge": "Preferált korosztály",
       "groupmateRedundancy": "Ismétlődő csapattársak",

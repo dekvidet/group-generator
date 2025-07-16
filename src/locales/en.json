@@ -97,6 +97,10 @@
       "header": "Generated Groups",
       "round": "Round"
     },
+    "buttons": {
+      "showStatistics": "Show Statistics",
+      "hideStatistics": "Hide Statistics"
+    },
     "fields": {
       "targetAge": "Preferred Age Group",
       "groupmateRedundancy": "Repeating Groupmates",
