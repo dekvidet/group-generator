@@ -46,8 +46,6 @@ interface AppState {
   displayColumns: string[];
   
   participantPairs: Set<string>;
-  pastGroupmates: Record<string, Set<string>>;
-  pastUnmetTargetAge: Record<string, number>;
   
   setGeneratorFile: (file: File) => void;
   setPresenterFile: (file: File | undefined) => void;
@@ -86,9 +84,9 @@ export const useStore = create<AppState>()(devtools((set, get) => ({
   participantRatios: null,
   ageGroups: null,
   groupSettings: {
-    groupSize: 2,
+    groupSize: 5,
     minLeaders: 0,
-    rounds: 1,
+    rounds: 3,
     shufflePolicy: 'unique',
     balanceGenders: true,
     splitByTargetAge: true,
@@ -100,8 +98,6 @@ export const useStore = create<AppState>()(devtools((set, get) => ({
   femaleValues: [],
   groupLeaderValues: [],
   targetAgeRanges: [],
-  pastGroupmates: {},
-  pastUnmetTargetAge: {},
   displayColumns: [],
   generatedIdCount: 0,
   duplicateRowCount: 0,
@@ -117,23 +113,26 @@ export const useStore = create<AppState>()(devtools((set, get) => ({
   setAgeGroups: (ageGroups) => set({ ageGroups }),
   setGroupSettings: (groupSettings) => set(state => ({ groupSettings: { ...state.groupSettings, ...groupSettings } })),
   setGeneratedGroups: (newGeneratedGroups: Round[]) => {
-    const { pastGroupmates, groupSettings, targetAgeRanges, pastUnmetTargetAge } = get();
-    const updatedPastGroupmates = { ...pastGroupmates };
-    const updatedPastUnmetTargetAge = { ...pastUnmetTargetAge };
+    const { groupSettings, targetAgeRanges } = get();
+    const pastGroupmates: Record<string, Set<string>> = {};
+    const accumulatedUnmetTargetAgeGroupmateCounts:  Record<string, number> = {};
+    const accumulatedRepeatedGroupmateCount:  Record<string, number> = {};
     const groupsWithRedundancy = newGeneratedGroups.map((round, roundIndex) => {
       return round.map(group => {
         const participantsWithRedundancy = group.participants.map(participant => {
-          let redundancy = 0;
+
+          let repeatedGroupmateCount = 0;
           if (roundIndex > 0) {
-            const currentParticipantPastGroupmates = updatedPastGroupmates[participant.id] || new Set();
+            const currentParticipantPastGroupmates = pastGroupmates[participant.id] || new Set();
             group.participants.forEach(otherParticipant => {
               if (participant.id !== otherParticipant.id && currentParticipantPastGroupmates.has(otherParticipant.id)) {
-                redundancy++;
+                repeatedGroupmateCount++;
               }
             });
           }
+          accumulatedRepeatedGroupmateCount[participant.id] = (accumulatedRepeatedGroupmateCount[participant.id] || 0) + repeatedGroupmateCount;
 
-          let unmetTargetAge = 0;
+          let unmetTargetAgeGroupmateCount = 0;
           if (groupSettings.splitByTargetAge) {
             const participantTargetAgeRange = targetAgeRanges.find(range => range.name === participant.targetAge);
             if (participantTargetAgeRange) {
@@ -144,32 +143,32 @@ export const useStore = create<AppState>()(devtools((set, get) => ({
                 if (participant.id !== otherParticipant.id) {
                   const otherParticipantAge = parseInt(otherParticipant.age);
                   if (otherParticipantAge < minAge || otherParticipantAge > maxAge) {
-                    unmetTargetAge++;
+                    unmetTargetAgeGroupmateCount++;
                   }
                 }
               });
             }
           }
-          const previousUnmetTargetAge = updatedPastUnmetTargetAge[participant.id] || 0;
-          updatedPastUnmetTargetAge[participant.id] = previousUnmetTargetAge + unmetTargetAge;
-          return { ...participant, groupmateRedundancy: redundancy, unmetTargetAge: updatedPastUnmetTargetAge[participant.id] };
+          accumulatedUnmetTargetAgeGroupmateCounts[participant.id] = (accumulatedUnmetTargetAgeGroupmateCounts[participant.id] || 0) + unmetTargetAgeGroupmateCount;
+
+          return { ...participant, groupmateRedundancy: accumulatedRepeatedGroupmateCount[participant.id], unmetTargetAge: accumulatedUnmetTargetAgeGroupmateCounts[participant.id] };
         });
 
         // Update pastGroupmates for all participants in the current group
         participantsWithRedundancy.forEach(participant => {
-          if (!updatedPastGroupmates[participant.id]) {
-            updatedPastGroupmates[participant.id] = new Set();
+          if (!pastGroupmates[participant.id]) {
+            pastGroupmates[participant.id] = new Set();
           }
-          group.participants.forEach(otherParticipant => {
-            if (participant.id !== otherParticipant.id) {
-              updatedPastGroupmates[participant.id].add(otherParticipant.id);
+          group.participants.forEach(groupmate => {
+            if (participant.id !== groupmate.id) {
+              pastGroupmates[participant.id].add(groupmate.id);
             }
           });
         });
         return { ...group, participants: participantsWithRedundancy };
       });
     });
-    set({ generatedGroups: groupsWithRedundancy, pastGroupmates: updatedPastGroupmates });
+    set({ generatedGroups: groupsWithRedundancy });
   },
   setParticipantPairs: (participantPairs) => set({ participantPairs }),
   setMaleValues: (maleValues) => set({ maleValues }),
@@ -193,9 +192,9 @@ export const useStore = create<AppState>()(devtools((set, get) => ({
     participantRatios: null,
     ageGroups: null,
     groupSettings: {
-      groupSize: 2,
+      groupSize: 5,
       minLeaders: 0,
-      rounds: 1,
+      rounds: 3,
       shufflePolicy: 'unique',
       balanceGenders: true,
       splitByTargetAge: true,
@@ -207,8 +206,6 @@ export const useStore = create<AppState>()(devtools((set, get) => ({
     femaleValues: [],
     groupLeaderValues: [],
     targetAgeRanges: [],
-    pastGroupmates: {},
-    pastUnmetTargetAge: {},
     displayColumns: [],
   }),
 }), { name: 'group-generator-storage' }))

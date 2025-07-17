@@ -92,31 +92,34 @@ const GroupGenerator: React.FC = () => {
   };
 
   const calculateGroupmateRedundancyScore = (group: Group, allParticipantPairs: Set<string>): number => {
-    if (group.participants.length === 0) return 0;
+    if (group.participants.length <= 1) return 0; // No groupmates or only one participant, no redundancy
 
-    let nonRepeatingCount = 0;
+    let totalRedundancyScore = 0;
+
     group.participants.forEach(participant => {
-      let participantNonRepeatingCount = 0;
-      for (let i = 0; i < group.participants.length; i++) {
-        const groupmate = group.participants[i];
+      let repeatingGroupmatesCount = 0;
+      const possibleGroupmates = group.participants.length - 1; // Exclude self
+
+      if (possibleGroupmates === 0) return; // Should not happen if group.participants.length > 1
+
+      for (const groupmate of group.participants) {
         if (participant.id !== groupmate.id) {
           const pairKey = `${Math.min(parseInt(participant.id), parseInt(groupmate.id))}-${Math.max(parseInt(participant.id), parseInt(groupmate.id))}`;
-          if (!allParticipantPairs.has(pairKey)) {
-            participantNonRepeatingCount++;
+          if (allParticipantPairs.has(pairKey)) { // Check if the pair has been seen before
+            repeatingGroupmatesCount++;
           }
         }
       }
-      // If a participant has no groupmates (group size 1), or no non-repeating groupmates, their score for this metric is 0.
-      // Otherwise, it's the ratio of non-repeating groupmates to total possible groupmates (group.participants.length - 1).
-      if (group.participants.length > 1) {
-        nonRepeatingCount += (participantNonRepeatingCount / (group.participants.length - 1));
-      }
+      // The redundancy for this participant is the ratio of repeating groupmates to total possible groupmates.
+      totalRedundancyScore += 1 - (repeatingGroupmatesCount / possibleGroupmates);
     });
 
-    return nonRepeatingCount / group.participants.length;
+    // Average the redundancy scores across all participants in the group.
+    return totalRedundancyScore / group.participants.length;
   };
 
   const handleGenerateGroups = () => {
+    setParticipantPairs(new Set());
     const { groupSize, rounds, minLeaders, balanceGenders, splitByTargetAge, shufflePolicy, compulsoryGroupLeader } = groupSettings;
     let leaders = processedData.filter((p: Participant) => p.isGroupLeader);
     let nonLeaders = processedData.filter((p: Participant) => !p.isGroupLeader);
@@ -322,7 +325,7 @@ const GroupGenerator: React.FC = () => {
             currentParticipantPairs.add(`${Math.min(parseInt(p1), parseInt(p2))}-${Math.max(parseInt(p1), parseInt(p2))}`);
           }
         }
-      });
+      });debugger
 
       // Calculate statistics for each group in the current round
       const totalMaleCount = processedData.filter(p => maleValues.includes(p.gender)).length;
