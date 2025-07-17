@@ -5,27 +5,7 @@ import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, 
 import * as XLSX from 'xlsx';
 import { useTranslation } from 'react-i18next';
 import Papa from 'papaparse';
-
-interface Participant {
-  id: string;
-  gender: string;
-  age: string;
-  isGroupLeader: boolean;
-  targetAge?: string;
-}
-
-interface Statistics {
-  genderRatioScore: number;
-  targetAgeScore: number;
-  groupmateRedundancyScore: number;
-  totalScore: number;
-}
-
-interface Group {
-  id: number;
-  participants: Participant[];
-  statistics?: Statistics;
-}
+import type { Group, Participant } from '../../../types';
 
 const GroupGenerator: React.FC = () => {
   const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, maleValues, femaleValues, targetAgeRanges, participantPairs, setParticipantPairs, generatedGroups, displayColumns, setDisplayColumns, headers } = useStore();
@@ -348,7 +328,64 @@ const GroupGenerator: React.FC = () => {
 
       newGeneratedGroups.push(roundGroups);
     }
-    setGeneratedGroups(newGeneratedGroups);
+
+    // Calculate the statistics for participants
+    const pastGroupmates: Record<string, Set<string>> = {};
+    const accumulatedUnmetTargetAgeGroupmateCounts:  Record<string, number> = {};
+    const accumulatedRepeatedGroupmateCount:  Record<string, number> = {};
+    const groupsWithRedundancy = newGeneratedGroups.map((round, roundIndex) => {
+      return round.map(group => {
+        const participantsWithRedundancy = group.participants.map(participant => {
+
+          let repeatedGroupmateCount = 0;
+          if (roundIndex > 0) {
+            const currentParticipantPastGroupmates = pastGroupmates[participant.id] || new Set();
+            group.participants.forEach(otherParticipant => {
+              if (participant.id !== otherParticipant.id && currentParticipantPastGroupmates.has(otherParticipant.id)) {
+                repeatedGroupmateCount++;
+              }
+            });
+          }
+          accumulatedRepeatedGroupmateCount[participant.id] = (accumulatedRepeatedGroupmateCount[participant.id] || 0) + repeatedGroupmateCount;
+
+          let unmetTargetAgeGroupmateCount = 0;
+          if (groupSettings.splitByTargetAge) {
+            const participantTargetAgeRange = targetAgeRanges.find(range => range.name === participant.targetAge);
+            if (participantTargetAgeRange) {
+              const minAge = parseInt(participantTargetAgeRange.from);
+              const maxAge = parseInt(participantTargetAgeRange.to);
+
+              group.participants.forEach(otherParticipant => {
+                if (participant.id !== otherParticipant.id) {
+                  const otherParticipantAge = parseInt(otherParticipant.age);
+                  if (otherParticipantAge < minAge || otherParticipantAge > maxAge) {
+                    unmetTargetAgeGroupmateCount++;
+                  }
+                }
+              });
+            }
+          }
+          accumulatedUnmetTargetAgeGroupmateCounts[participant.id] = (accumulatedUnmetTargetAgeGroupmateCounts[participant.id] || 0) + unmetTargetAgeGroupmateCount;
+
+          return { ...participant, statistics: { groupmateRedundancy: accumulatedRepeatedGroupmateCount[participant.id], unmetTargetAge: accumulatedUnmetTargetAgeGroupmateCounts[participant.id] } };
+        });
+
+        // Update pastGroupmates for all participants in the current group
+        participantsWithRedundancy.forEach(participant => {
+          if (!pastGroupmates[participant.id]) {
+            pastGroupmates[participant.id] = new Set();
+          }
+          group.participants.forEach(groupmate => {
+            if (participant.id !== groupmate.id) {
+              pastGroupmates[participant.id].add(groupmate.id);
+            }
+          });
+        });
+        return { ...group, participants: participantsWithRedundancy };
+      });
+    });
+
+    setGeneratedGroups(groupsWithRedundancy);
     setParticipantPairs(currentParticipantPairs);
   };
 

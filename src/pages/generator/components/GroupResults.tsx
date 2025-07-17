@@ -2,29 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../../../store';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-
-interface Participant {
-  id: string;
-  gender: string;
-  age: string;
-  isGroupLeader: boolean;
-  targetAge?: string;
-  groupmateRedundancy?: number;
-  unmetTargetAge?: number;
-}
-
-interface Statistics {
-  genderRatioScore: number;
-  targetAgeScore: number;
-  groupmateRedundancyScore: number;
-  totalScore: number;
-}
-
-interface Group {
-  id: number;
-  participants: Participant[];
-  statistics?: Statistics;
-}
+import type { Group, Participant } from '../../../types';
 
 const GroupResults: React.FC = () => {
   const { generatedGroups, groupSettings, displayColumns, mappedColumns } = useStore();
@@ -183,8 +161,8 @@ const GroupResults: React.FC = () => {
                           <TableCell key={column}>{participant[column as keyof Participant]}</TableCell>
                         ))}
                         <TableCell>{participant.targetAge}</TableCell>
-                        <TableCell>{participant.groupmateRedundancy}</TableCell>
-                        {groupSettings.splitByTargetAge && <TableCell>{participant.unmetTargetAge}</TableCell>}
+                        <TableCell>{participant.statistics?.groupmateRedundancy}</TableCell>
+                        {groupSettings.splitByTargetAge && <TableCell>{participant.statistics?.unmetTargetAge}</TableCell>}
                       </TableRow>
                     ))}
                   </TableBody>
