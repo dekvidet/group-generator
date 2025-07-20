@@ -14,7 +14,8 @@ const GroupResults: React.FC = () => {
     return null;
   }
 
-  const showAverageAge = mappedColumns.age;
+  const showAverageAge = mappedColumns.age
+  const showTargetAgeColumn = mappedColumns.targetAge
 
   return (
     <Box sx={{ marginTop: '20px' }}>
@@ -138,13 +139,24 @@ const GroupResults: React.FC = () => {
                       {displayColumns.map(column => (
                         <TableCell key={column}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableCell>
                       ))}
-                      <TableCell>{t('groupResults.fields.targetAge')}</TableCell>
-                      <TableCell>{t('groupResults.fields.repeatedGroupmateCount')}</TableCell>
-                      {groupSettings.splitByTargetAge && <TableCell>{t('groupResults.fields.unmetTargetAgeGroupmateCount')}</TableCell>}
+                      {showTargetAgeColumn && <TableCell>{t('groupResults.fields.targetAge')}</TableCell>}
+                      <TableCell colSpan={2}>{t('groupResults.fields.repeatedGroupmateCount')}</TableCell>
+                      {groupSettings.splitByTargetAge && <TableCell colSpan={2}>{t('groupResults.fields.unmetTargetAgeGroupmateCount')}</TableCell>}
+                    </TableRow>
+                    <TableRow>
+                      {displayColumns.length > 0 && <TableCell colSpan={displayColumns.length + (showTargetAgeColumn ? 1 : 0)}></TableCell>}
+                      <TableCell>{t('groupResults.texts.perRound')}</TableCell>
+                      <TableCell>{t('groupResults.texts.total')}</TableCell>
+                      {groupSettings.splitByTargetAge && (
+                        <>
+                          <TableCell>{t('groupResults.texts.perRound')}</TableCell>
+                          <TableCell>{t('groupResults.texts.total')}</TableCell>
+                        </>
+                      )}
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {group.participants.map((participant: Participant) => (
+                    {group.participants.map((participant) => (
                       <TableRow
                         key={participant.id}
                         sx={{
@@ -155,9 +167,11 @@ const GroupResults: React.FC = () => {
                         {displayColumns.map(column => (
                           <TableCell key={column}>{participant[column as keyof Participant]}</TableCell>
                         ))}
-                        <TableCell>{participant.targetAge}</TableCell>
-                        <TableCell>{participant.statistics?.repeatedGroupmateCount}</TableCell>
-                        {groupSettings.splitByTargetAge && <TableCell>{participant.statistics?.unmetTargetAgeGroupmateCount}</TableCell>}
+                        {showTargetAgeColumn && <TableCell>{participant.targetAge}</TableCell>}
+                        <TableCell>{participant.statistics.repeatedGroupmateCount}</TableCell>
+                        <TableCell>{participant.statistics.accumulatedRepeatedGroupmateCount}</TableCell>
+                        {groupSettings.splitByTargetAge && <TableCell>{participant.statistics.unmetTargetAgeGroupmateCount}</TableCell>}
+                        {groupSettings.splitByTargetAge && <TableCell>{participant.statistics.accumulatedUnmetTargetAgeGroupmateCounts}</TableCell>}
                       </TableRow>
                     ))}
                   </TableBody>

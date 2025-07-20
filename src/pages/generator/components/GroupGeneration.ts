@@ -11,6 +11,7 @@ export function getBestParticipant(
   pastGroupmates: Record<string, Set<string>>,
   groupSize: number,
   targetAgeRanges: { from: string; to: string; name: string }[],
+  maleRatio: number,
 ): Participant | null {
   if (remainingNonLeaders.length === 0) return null;
 
@@ -36,8 +37,8 @@ export function getBestParticipant(
     const currentMaleCount = currentGroup.participants.filter((p: Participant) => maleValues.includes(p.gender)).length;
     const currentFemaleCount = currentGroup.participants.filter((p: Participant) => femaleValues.includes(p.gender)).length;
 
-    const idealMaleCount = Math.ceil(groupSize / 2);
-    const idealFemaleCount = Math.floor(groupSize / 2);
+    const idealMaleCount = Math.round(groupSize * maleRatio);
+    const idealFemaleCount = groupSize - idealMaleCount;
 
     let preferredGender: string | null = null;
     if (currentMaleCount < idealMaleCount && currentFemaleCount < idealFemaleCount) {
@@ -64,6 +65,7 @@ export function getBestParticipant(
       if (genderCandidates.length > 0) {
         candidates = genderCandidates;
       } else {
+        // @TODO Shouldn't we use the candidates that got filtered out in the splitByTargetAge block?
         candidates = remainingNonLeaders;
       }
     }

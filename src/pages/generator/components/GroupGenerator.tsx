@@ -115,6 +115,9 @@ const GroupGenerator: React.FC = () => {
         let assignedThisIteration = false;
         for (const group of roundGroups) {
           if (group.participants.length < groupSize) {
+            const totalMaleCount = allParticipants.filter(p => maleValues.includes(p.gender)).length;
+            const totalFemaleCount = allParticipants.filter(p => femaleValues.includes(p.gender)).length;
+            const maleRatio = totalMaleCount / (totalMaleCount + totalFemaleCount);
             const participantToAssign = getBestParticipant(
               group,
               availableNonLeaders,
@@ -125,7 +128,8 @@ const GroupGenerator: React.FC = () => {
               femaleValues,
               pastGroupmates,
               groupSize,
-              targetAgeRanges
+              targetAgeRanges,
+              maleRatio
             );
 
             if (participantToAssign) {
@@ -194,11 +198,11 @@ const GroupGenerator: React.FC = () => {
     const accumulatedRepeatedGroupmateCount:  Record<string, number> = {};
     const nextGeneratedGroupsWithStatistics = nextGeneratedGroups.map((round) => {
       return round.map(group => {
-        const participantsWithRedundancy = group.participants.map(participant => {
+        const participantsWithStatistics = group.participants.map(participant => {
 
-          accumulatedRepeatedGroupmateCount[participant.id] = (accumulatedRepeatedGroupmateCount[participant.id]) + participant.statistics.repeatedGroupmateCount;
+          accumulatedRepeatedGroupmateCount[participant.id] = (accumulatedRepeatedGroupmateCount[participant.id] || 0) + participant.statistics.repeatedGroupmateCount;
           if (groupSettings.splitByTargetAge) {
-            accumulatedUnmetTargetAgeGroupmateCounts[participant.id] = (accumulatedUnmetTargetAgeGroupmateCounts[participant.id]) + participant?.statistics?.unmetTargetAgeGroupmateCount;
+            accumulatedUnmetTargetAgeGroupmateCounts[participant.id] = (accumulatedUnmetTargetAgeGroupmateCounts[participant.id] || 0) + participant?.statistics?.unmetTargetAgeGroupmateCount;
           }
 
           return { ...participant, statistics: {
@@ -208,7 +212,7 @@ const GroupGenerator: React.FC = () => {
           }};
         });
 
-        return { ...group, participants: participantsWithRedundancy };
+        return { ...group, participants: participantsWithStatistics };
       });
     });
 

@@ -95,7 +95,9 @@
   "groupResults": {
     "texts": {
       "header": "Generated Groups",
-      "round": "Round"
+      "round": "Round",
+      "perRound": "Per Round",
+      "total": "Total"
     },
     "buttons": {
       "showStatistics": "Show Statistics",

@@ -95,7 +95,9 @@
   "groupResults": {
     "texts": {
       "header": "Generált csoportok",
-      "round": "Kör"
+      "round": "Kör",
+      "perRound": "Körönként",
+      "total": "Összesen"
     },
     "buttons": {
       "showStatistics": "Statisztika mutatása",
