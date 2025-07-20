@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type { Round } from './types';
+import type { Round, TargetAgeRange } from './types';
 
 
 interface AppState {
@@ -15,7 +15,7 @@ interface AppState {
   mappedColumns: Record<string, string | null>;
   maleValues: string[];
   femaleValues: string[];
-  targetAgeRanges: { from: string; to: string; name: string }[];
+  targetAgeRanges: TargetAgeRange[];
   groupLeaderValues: string[];
   processedData: any[];
   

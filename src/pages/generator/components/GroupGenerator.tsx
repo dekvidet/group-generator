@@ -6,9 +6,10 @@ import * as XLSX from 'xlsx';
 import { useTranslation } from 'react-i18next';
 import Papa from 'papaparse';
 import type { Group, Participant } from '../../../types';
+import { calculateGenderRatioScore, calculateGroupmateRedundancyScore, calculateRepeatedGroupmateCount, calculateTargetAgeScore, calculateUnmetTargetAgeGroupmateCount } from './GroupGeneration';
 
 const GroupGenerator: React.FC = () => {
-  const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, maleValues, femaleValues, targetAgeRanges, participantPairs, setParticipantPairs, generatedGroups, displayColumns, setDisplayColumns, headers } = useStore();
+  const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, maleValues, femaleValues, targetAgeRanges, participantPairs, generatedGroups, displayColumns, setDisplayColumns, headers } = useStore();
   const { t } = useTranslation();
 
   const handleChange = (field: string, value: any) => {
@@ -21,86 +22,9 @@ const GroupGenerator: React.FC = () => {
     return totalAge / group.participants.length;
   };
 
-  const calculateGenderRatioScore = (group: Group, maleValues: string[], femaleValues: string[], totalMaleCount: number, totalFemaleCount: number): number => {
-    if (group.participants.length === 0) return 0;
-
-    const groupMaleCount = group.participants.filter(p => maleValues.includes(p.gender)).length;
-    const groupFemaleCount = group.participants.filter(p => femaleValues.includes(p.gender)).length;
-
-    const totalParticipants = totalMaleCount + totalFemaleCount;
-    if (totalParticipants === 0) return 1; // No participants, perfect ratio
-
-    const overallMaleRatio = totalMaleCount / totalParticipants;
-    const overallFemaleRatio = totalFemaleCount / totalParticipants;
-
-    const groupTotal = groupMaleCount + groupFemaleCount;
-    if (groupTotal === 0) return 0; // No participants in group, cannot calculate ratio
-
-    const groupMaleRatio = groupMaleCount / groupTotal;
-    const groupFemaleRatio = groupFemaleCount / groupTotal;
-
-    const maleRatioDifference = Math.abs(groupMaleRatio - overallMaleRatio);
-    const femaleRatioDifference = Math.abs(groupFemaleRatio - overallFemaleRatio);
-
-    // The closer the difference is to 0, the better. Max difference is 1.
-    // So, 1 - difference gives a score where 1 is best and 0 is worst.
-    return 1 - ((maleRatioDifference + femaleRatioDifference) / 2);
-  };
-
-  const calculateTargetAgeScore = (group: Group): number => {
-    if (group.participants.length === 0) return 0;
-
-    let achievedCount = 0;
-    group.participants.forEach(participant => {
-      if (participant.targetAge) {
-        const targetAgeRange = targetAgeRanges.find(range => range.name === participant.targetAge);
-        if (targetAgeRange) {
-          const minAge = parseInt(targetAgeRange.from);
-          const maxAge = parseInt(targetAgeRange.to);
-          const groupmatesMeetingTarget = group.participants.filter(p => {
-            const age = parseInt(p.age);
-            return p.id !== participant.id && age >= minAge && age <= maxAge;
-          }).length;
-          if (groupmatesMeetingTarget > 0) {
-            achievedCount++;
-          }
-        }
-      }
-    });
-
-    return achievedCount / group.participants.length;
-  };
-
-  const calculateGroupmateRedundancyScore = (group: Group, allParticipantPairs: Set<string>): number => {
-    if (group.participants.length <= 1) return 0; // No groupmates or only one participant, no redundancy
-
-    let totalRedundancyScore = 0;
-
-    group.participants.forEach(participant => {
-      let repeatingGroupmatesCount = 0;
-      const possibleGroupmates = group.participants.length - 1; // Exclude self
-
-      if (possibleGroupmates === 0) return; // Should not happen if group.participants.length > 1
-
-      for (const groupmate of group.participants) {
-        if (participant.id !== groupmate.id) {
-          const pairKey = `${Math.min(parseInt(participant.id), parseInt(groupmate.id))}-${Math.max(parseInt(participant.id), parseInt(groupmate.id))}`;
-          if (allParticipantPairs.has(pairKey)) { // Check if the pair has been seen before
-            repeatingGroupmatesCount++;
-          }
-        }
-      }
-      // The redundancy for this participant is the ratio of repeating groupmates to total possible groupmates.
-      totalRedundancyScore += 1 - (repeatingGroupmatesCount / possibleGroupmates);
-    });
-
-    // Average the redundancy scores across all participants in the group.
-    return totalRedundancyScore / group.participants.length;
-  };
-
   const handleGenerateGroups = () => {
-    setParticipantPairs(new Set());
     const { groupSize, rounds, minLeaders, balanceGenders, splitByTargetAge, shufflePolicy, compulsoryGroupLeader } = groupSettings;
+    const pastGroupmates: Record<string, Set<string>> = {};
     let leaders = processedData.filter((p: Participant) => p.isGroupLeader);
     let nonLeaders = processedData.filter((p: Participant) => !p.isGroupLeader);
 
@@ -125,7 +49,6 @@ const GroupGenerator: React.FC = () => {
     }
 
     const newGeneratedGroups: Group[][] = [];
-    const currentParticipantPairs = new Set<string>(participantPairs);
 
     for (let i = 0; i < rounds; i++) {
       const roundGroups: Group[] = [];
@@ -189,7 +112,7 @@ const GroupGenerator: React.FC = () => {
         shufflePolicy: string,
         maleValues: string[],
         femaleValues: string[],
-        currentParticipantPairs: Set<string>,
+        pastGroupmates: Record<string, Set<string>>,
         groupSize: number,
         targetAgeRanges: { from: string; to: string; name: string }[]
       ): Participant | null => {
@@ -252,15 +175,17 @@ const GroupGenerator: React.FC = () => {
 
         if (shufflePolicy === 'unique') {
           return candidates.sort((a: Participant, b: Participant) => {
-            let aConflicts = 0;
-            let bConflicts = 0;
-            for (const existingParticipant of currentGroup.participants) {
-              const pairKeyA = `${Math.min(parseInt(a.id), parseInt(existingParticipant.id))}-${Math.max(parseInt(a.id), parseInt(existingParticipant.id))}`;
-              const pairKeyB = `${Math.min(parseInt(b.id), parseInt(existingParticipant.id))}-${Math.max(parseInt(b.id), parseInt(existingParticipant.id))}`;
-              if (currentParticipantPairs.has(pairKeyA)) aConflicts++;
-              if (currentParticipantPairs.has(pairKeyB)) bConflicts++;
+            let aRepeatedGroupmateCount = 0
+            let bRepeatedGroupmateCount = 0
+            for (const groupmember of currentGroup.participants) {
+              if (pastGroupmates[a.id]?.has(groupmember.id)) {
+                ++aRepeatedGroupmateCount
+              }
+              if (pastGroupmates[b.id]?.has(groupmember.id)) {
+                ++bRepeatedGroupmateCount
+              }
             }
-            return aConflicts - bConflicts;
+            return aRepeatedGroupmateCount - bRepeatedGroupmateCount;
           })[0];
         } else {
           return candidates[Math.floor(Math.random() * candidates.length)];
@@ -279,7 +204,7 @@ const GroupGenerator: React.FC = () => {
               shufflePolicy,
               maleValues,
               femaleValues,
-              currentParticipantPairs,
+              pastGroupmates,
               groupSize,
               targetAgeRanges
             );
@@ -296,16 +221,32 @@ const GroupGenerator: React.FC = () => {
         }
       }
 
+      roundGroups.forEach(group => {
+        group.participants = group.participants.map(participant => {
+          return {
+            ...participant,
+            statistics: {
+              repeatedGroupmateCount: calculateRepeatedGroupmateCount(group, participant, pastGroupmates),
+              unmetTargetAgeGroupmateCount: calculateUnmetTargetAgeGroupmateCount(group, participant, targetAgeRanges),
+            }
+          }}
+        )
+      })
+
       // Update participant pairs for the next round
       roundGroups.forEach(group => {
-        for (let k = 0; k < group.participants.length; k++) {
-          for (let l = k + 1; l < group.participants.length; l++) {
-            const p1 = group.participants[k].id;
-            const p2 = group.participants[l].id;
-            currentParticipantPairs.add(`${Math.min(parseInt(p1), parseInt(p2))}-${Math.max(parseInt(p1), parseInt(p2))}`);
+        group.participants.forEach(participant => {
+          if (!pastGroupmates[participant.id]) {
+            pastGroupmates[participant.id] = new Set();
           }
-        }
-      });debugger
+          group.participants.forEach(groupmate => {
+            if (participant.id !== groupmate.id) {
+              pastGroupmates[participant.id].add(groupmate.id);
+            }
+          });
+        });
+      });
+
 
       // Calculate statistics for each group in the current round
       const totalMaleCount = processedData.filter(p => maleValues.includes(p.gender)).length;
@@ -313,8 +254,8 @@ const GroupGenerator: React.FC = () => {
 
       roundGroups.forEach(group => {
         const genderRatioScore = calculateGenderRatioScore(group, maleValues, femaleValues, totalMaleCount, totalFemaleCount);
-        const targetAgeScore = calculateTargetAgeScore(group);
-        const groupmateRedundancyScore = calculateGroupmateRedundancyScore(group, currentParticipantPairs);
+        const targetAgeScore = calculateTargetAgeScore(group, targetAgeRanges);
+        const groupmateRedundancyScore = calculateGroupmateRedundancyScore(group);
 
         const totalScore = (genderRatioScore + targetAgeScore + groupmateRedundancyScore) / 3;
 
@@ -330,44 +271,18 @@ const GroupGenerator: React.FC = () => {
     }
 
     // Calculate the statistics for participants
-    const pastGroupmates: Record<string, Set<string>> = {};
     const accumulatedUnmetTargetAgeGroupmateCounts:  Record<string, number> = {};
     const accumulatedRepeatedGroupmateCount:  Record<string, number> = {};
-    const groupsWithRedundancy = newGeneratedGroups.map((round, roundIndex) => {
+    const groupsWithRedundancy = newGeneratedGroups.map((round) => {
       return round.map(group => {
         const participantsWithRedundancy = group.participants.map(participant => {
 
-          let repeatedGroupmateCount = 0;
-          if (roundIndex > 0) {
-            const currentParticipantPastGroupmates = pastGroupmates[participant.id] || new Set();
-            group.participants.forEach(otherParticipant => {
-              if (participant.id !== otherParticipant.id && currentParticipantPastGroupmates.has(otherParticipant.id)) {
-                repeatedGroupmateCount++;
-              }
-            });
-          }
-          accumulatedRepeatedGroupmateCount[participant.id] = (accumulatedRepeatedGroupmateCount[participant.id] || 0) + repeatedGroupmateCount;
-
-          let unmetTargetAgeGroupmateCount = 0;
+          accumulatedRepeatedGroupmateCount[participant.id] = (accumulatedRepeatedGroupmateCount[participant.id] || 0) + (participant?.statistics?.repeatedGroupmateCount || 0);
           if (groupSettings.splitByTargetAge) {
-            const participantTargetAgeRange = targetAgeRanges.find(range => range.name === participant.targetAge);
-            if (participantTargetAgeRange) {
-              const minAge = parseInt(participantTargetAgeRange.from);
-              const maxAge = parseInt(participantTargetAgeRange.to);
-
-              group.participants.forEach(otherParticipant => {
-                if (participant.id !== otherParticipant.id) {
-                  const otherParticipantAge = parseInt(otherParticipant.age);
-                  if (otherParticipantAge < minAge || otherParticipantAge > maxAge) {
-                    unmetTargetAgeGroupmateCount++;
-                  }
-                }
-              });
-            }
+            accumulatedUnmetTargetAgeGroupmateCounts[participant.id] = (accumulatedUnmetTargetAgeGroupmateCounts[participant.id] || 0) + (participant?.statistics?.unmetTargetAgeGroupmateCount || 0);
           }
-          accumulatedUnmetTargetAgeGroupmateCounts[participant.id] = (accumulatedUnmetTargetAgeGroupmateCounts[participant.id] || 0) + unmetTargetAgeGroupmateCount;
 
-          return { ...participant, statistics: { groupmateRedundancy: accumulatedRepeatedGroupmateCount[participant.id], unmetTargetAge: accumulatedUnmetTargetAgeGroupmateCounts[participant.id] } };
+          return { ...participant, statistics: { repeatedGroupmateCount: accumulatedRepeatedGroupmateCount[participant.id], unmetTargetAgeGroupmateCount: accumulatedUnmetTargetAgeGroupmateCounts[participant.id] } };
         });
 
         // Update pastGroupmates for all participants in the current group
@@ -386,7 +301,6 @@ const GroupGenerator: React.FC = () => {
     });
 
     setGeneratedGroups(groupsWithRedundancy);
-    setParticipantPairs(currentParticipantPairs);
   };
 
   const handleDownload = () => {

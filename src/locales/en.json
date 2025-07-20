@@ -103,8 +103,8 @@
     },
     "fields": {
       "targetAge": "Preferred Age Group",
-      "groupmateRedundancy": "Repeating Groupmates",
-      "unmetTargetAge": "Individuals Outside Preferred Age Group",
+      "repeatedGroupmateCount": "Repeating Groupmates",
+      "unmetTargetAgeGroupmateCount": "Individuals Outside Preferred Age Group",
       "group": "Group",
       "averageAge": "average age",
       "genderRatioScore": "Gender Ratio Score",

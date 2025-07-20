@@ -34,7 +34,7 @@ const GroupResults: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>{t('groupResults.fields.round')}</TableCell>
+                <TableCell>{t('groupResults.texts.round')}</TableCell>
                 <TableCell>{t('groupResults.fields.group')}</TableCell>
                 <TableCell>{t('groupResults.fields.genderRatioScore')}</TableCell>
                 <TableCell>{t('groupResults.fields.targetAgeScore')}</TableCell>
@@ -144,8 +144,8 @@ const GroupResults: React.FC = () => {
                         <TableCell key={column}>{column.charAt(0).toUpperCase() + column.slice(1)}</TableCell>
                       ))}
                       <TableCell>{t('groupResults.fields.targetAge')}</TableCell>
-                      <TableCell>{t('groupResults.fields.groupmateRedundancy')}</TableCell>
-                      {groupSettings.splitByTargetAge && <TableCell>{t('groupResults.fields.unmetTargetAge')}</TableCell>}
+                      <TableCell>{t('groupResults.fields.repeatedGroupmateCount')}</TableCell>
+                      {groupSettings.splitByTargetAge && <TableCell>{t('groupResults.fields.unmetTargetAgeGroupmateCount')}</TableCell>}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -161,8 +161,8 @@ const GroupResults: React.FC = () => {
                           <TableCell key={column}>{participant[column as keyof Participant]}</TableCell>
                         ))}
                         <TableCell>{participant.targetAge}</TableCell>
-                        <TableCell>{participant.statistics?.groupmateRedundancy}</TableCell>
-                        {groupSettings.splitByTargetAge && <TableCell>{participant.statistics?.unmetTargetAge}</TableCell>}
+                        <TableCell>{participant.statistics?.repeatedGroupmateCount}</TableCell>
+                        {groupSettings.splitByTargetAge && <TableCell>{participant.statistics?.unmetTargetAgeGroupmateCount}</TableCell>}
                       </TableRow>
                     ))}
                   </TableBody>

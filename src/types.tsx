@@ -6,6 +6,13 @@ export interface Group {
   statistics?: Statistics;
 }
 
+export interface Statistics {
+  genderRatioScore: number;
+  targetAgeScore: number;
+  groupmateRedundancyScore: number;
+  totalScore: number;
+}
+
 export interface Participant {
   id: string;
   gender: string;
@@ -13,15 +20,14 @@ export interface Participant {
   isGroupLeader: boolean;
   targetAge?: string;
   statistics?: {
-    groupmateRedundancy?: number;
-    unmetTargetAge?: number;
+    repeatedGroupmateCount?: number;
+    unmetTargetAgeGroupmateCount?: number;
   };
-  [key: string]: any; // Allow for arbitrary additional properties
+  [key: string]: any; // Allow for arbitrary additional properties that come from CSV columns
 }
 
-export interface Statistics {
-  genderRatioScore: number;
-  targetAgeScore: number;
-  groupmateRedundancyScore: number;
-  totalScore: number;
+export interface TargetAgeRange {
+  from: string;
+  to: string;
+  name: string;
 }
