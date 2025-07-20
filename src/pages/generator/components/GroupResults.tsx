@@ -3,17 +3,12 @@ import { useStore } from '../../../store';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import type { Group, Participant } from '../../../types';
+import { getAverageAge } from './GroupGeneration';
 
 const GroupResults: React.FC = () => {
   const { generatedGroups, groupSettings, displayColumns, mappedColumns } = useStore();
   const { t } = useTranslation();
   const [showStatistics, setShowStatistics] = useState(false);
-
-  const getAverageAge = (group: Group) => {
-    if (group.participants.length === 0) return 0;
-    const totalAge = group.participants.reduce((sum: number, p: Participant) => sum + parseInt(p.age), 0);
-    return (totalAge / group.participants.length).toFixed(1);
-  };
 
   if (generatedGroups.length === 0) {
     return null;

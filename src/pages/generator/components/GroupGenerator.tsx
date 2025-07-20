@@ -5,8 +5,8 @@ import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, 
 import * as XLSX from 'xlsx';
 import { useTranslation } from 'react-i18next';
 import Papa from 'papaparse';
-import type { Group, Participant } from '../../../types';
-import { calculateGenderRatioScore, calculateGroupmateRedundancyScore, calculateRepeatedGroupmateCount, calculateTargetAgeScore, calculateUnmetTargetAgeGroupmateCount } from './GroupGeneration';
+import type { Group, Participant, ParticipantWithStatistics } from '../../../types';
+import { calculateGenderRatioScore, calculateGroupmateRedundancyScore, calculateRepeatedGroupmateCount, calculateTargetAgeScore, calculateUnmetTargetAgeGroupmateCount, getBestParticipant } from './GroupGeneration';
 
 const GroupGenerator: React.FC = () => {
   const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, maleValues, femaleValues, targetAgeRanges, generatedGroups, displayColumns, setDisplayColumns, headers } = useStore();
@@ -16,21 +16,28 @@ const GroupGenerator: React.FC = () => {
     setGroupSettings({ [field]: value });
   };
 
-  const getAverageAge = (group: Group) => {
-    if (group.participants.length === 0) return 0;
-    const totalAge = group.participants.reduce((sum: number, p: Participant) => sum + parseInt(p.age), 0);
-    return totalAge / group.participants.length;
-  };
+  function addStatistics(participant: Participant): ParticipantWithStatistics {
+    return ({
+      ...participant,
+      statistics: {
+        repeatedGroupmateCount: 0,
+        unmetTargetAgeGroupmateCount: 0,
+        accumulatedRepeatedGroupmateCount: 0,
+        accumulatedUnmetTargetAgeGroupmateCounts: 0,
+      }
+    })
+  }
 
   const handleGenerateGroups = () => {
     const { groupSize, rounds, minLeaders, balanceGenders, splitByTargetAge, shufflePolicy, compulsoryGroupLeader } = groupSettings;
     const pastGroupmates: Record<string, Set<string>> = {};
-    let leaders = processedData.filter((p: Participant) => p.isGroupLeader);
-    let nonLeaders = processedData.filter((p: Participant) => !p.isGroupLeader);
+    const allParticipants: Participant[] = processedData
+    const leaders = allParticipants.filter((p: Participant) => p.isGroupLeader);
+    const nonLeaders = allParticipants.filter((p: Participant) => !p.isGroupLeader);
 
     // Compulsory group leader logic (global before rounds)
     if (compulsoryGroupLeader) {
-      const numGroups = Math.ceil(processedData.length / groupSize);
+      const numGroups = Math.ceil(allParticipants.length / groupSize);
       const requiredLeadersCount = numGroups * minLeaders;
 
       if (leaders.length < requiredLeadersCount) {
@@ -48,11 +55,11 @@ const GroupGenerator: React.FC = () => {
       }
     }
 
-    const newGeneratedGroups: Group[][] = [];
+    const nextGeneratedGroups: Group[][] = [];
 
     for (let i = 0; i < rounds; i++) {
       const roundGroups: Group[] = [];
-      const numGroups = Math.ceil(processedData.length / groupSize);
+      const numGroups = Math.ceil(allParticipants.length / groupSize);
 
       // Initialize groups with leaders (fixed to group ID)
       for (let j = 0; j < numGroups; j++) {
@@ -65,7 +72,7 @@ const GroupGenerator: React.FC = () => {
         for (let j = 0; j < minLeaders; j++) {
           for (let k = 0; k < numGroups; k++) {
             if (leaders[leaderIndex]) {
-              roundGroups[k].participants.push(leaders[leaderIndex]);
+              roundGroups[k].participants.push(addStatistics(leaders[leaderIndex]));
               leaderIndex++;
             }
           }
@@ -73,7 +80,7 @@ const GroupGenerator: React.FC = () => {
         while (leaderIndex < leaders.length) {
           for (let k = 0; k < numGroups; k++) {
             if (leaders[leaderIndex]) {
-              roundGroups[k].participants.push(leaders[leaderIndex]);
+              roundGroups[k].participants.push(addStatistics(leaders[leaderIndex]));
               leaderIndex++;
             }
           }
@@ -87,7 +94,7 @@ const GroupGenerator: React.FC = () => {
         for (let j = 0; j < minLeaders; j++) {
           for (let k = 0; k < numGroups; k++) {
             if (leaders[leaderIndex]) {
-              roundGroups[k].participants.push(leaders[leaderIndex]);
+              roundGroups[k].participants.push(addStatistics(leaders[leaderIndex]));
               leaderIndex++;
             }
           }
@@ -95,7 +102,7 @@ const GroupGenerator: React.FC = () => {
         while (leaderIndex < leaders.length) {
           for (let k = 0; k < numGroups; k++) {
             if (leaders[leaderIndex]) {
-              roundGroups[k].participants.push(leaders[leaderIndex]);
+              roundGroups[k].participants.push(addStatistics(leaders[leaderIndex]));
               leaderIndex++;
             }
           }
@@ -103,94 +110,6 @@ const GroupGenerator: React.FC = () => {
       }
 
       let availableNonLeaders = [...nonLeaders];
-
-      const getBestParticipant = (
-        currentGroup: Group,
-        remainingNonLeaders: Participant[],
-        balanceGenders: boolean,
-        splitByTargetAge: boolean,
-        shufflePolicy: string,
-        maleValues: string[],
-        femaleValues: string[],
-        pastGroupmates: Record<string, Set<string>>,
-        groupSize: number,
-        targetAgeRanges: { from: string; to: string; name: string }[]
-      ): Participant | null => {
-        if (remainingNonLeaders.length === 0) return null;
-
-        let candidates = [...remainingNonLeaders];
-
-        if (splitByTargetAge) {
-          const currentGroupAverageAge = getAverageAge(currentGroup);
-          const suitableCandidates = candidates.filter((p: Participant) => {
-            const targetAgeRange = targetAgeRanges.find(range => range.name === p.targetAge);
-            if (targetAgeRange) {
-              const minAge = parseInt(targetAgeRange.from);
-              const maxAge = parseInt(targetAgeRange.to);
-              return currentGroupAverageAge >= minAge && currentGroupAverageAge <= maxAge;
-            }
-            return false;
-          });
-          if (suitableCandidates.length > 0) {
-            candidates = suitableCandidates;
-          }
-        }
-
-        if (balanceGenders) {
-          const currentMaleCount = currentGroup.participants.filter((p: Participant) => maleValues.includes(p.gender)).length;
-          const currentFemaleCount = currentGroup.participants.filter((p: Participant) => femaleValues.includes(p.gender)).length;
-
-          const idealMaleCount = Math.ceil(groupSize / 2);
-          const idealFemaleCount = Math.floor(groupSize / 2);
-
-          let preferredGender: string | null = null;
-          if (currentMaleCount < idealMaleCount && currentFemaleCount < idealFemaleCount) {
-            const malesInRemaining = candidates.filter((p: Participant) => maleValues.includes(p.gender)).length;
-            const femalesInRemaining = candidates.filter((p: Participant) => femaleValues.includes(p.gender)).length;
-            if (malesInRemaining > 0 && femalesInRemaining > 0) {
-              preferredGender = (malesInRemaining <= femalesInRemaining) ? 'male' : 'female';
-            } else if (malesInRemaining > 0) {
-              preferredGender = 'male';
-            } else if (femalesInRemaining > 0) {
-              preferredGender = 'female';
-            }
-          } else if (currentMaleCount < idealMaleCount) {
-            preferredGender = 'male';
-          } else if (currentFemaleCount < idealFemaleCount) {
-            preferredGender = 'female';
-          }
-
-          if (preferredGender) {
-            const genderCandidates = candidates.filter((p: Participant) =>
-              (preferredGender === 'male' && maleValues.includes(p.gender)) ||
-              (preferredGender === 'female' && femaleValues.includes(p.gender))
-            );
-            if (genderCandidates.length > 0) {
-              candidates = genderCandidates;
-            } else {
-              candidates = remainingNonLeaders;
-            }
-          }
-        }
-
-        if (shufflePolicy === 'unique') {
-          return candidates.sort((a: Participant, b: Participant) => {
-            let aRepeatedGroupmateCount = 0
-            let bRepeatedGroupmateCount = 0
-            for (const groupmember of currentGroup.participants) {
-              if (pastGroupmates[a.id]?.has(groupmember.id)) {
-                ++aRepeatedGroupmateCount
-              }
-              if (pastGroupmates[b.id]?.has(groupmember.id)) {
-                ++bRepeatedGroupmateCount
-              }
-            }
-            return aRepeatedGroupmateCount - bRepeatedGroupmateCount;
-          })[0];
-        } else {
-          return candidates[Math.floor(Math.random() * candidates.length)];
-        }
-      };
 
       while (availableNonLeaders.length > 0) {
         let assignedThisIteration = false;
@@ -210,7 +129,7 @@ const GroupGenerator: React.FC = () => {
             );
 
             if (participantToAssign) {
-              group.participants.push(participantToAssign);
+              group.participants.push(addStatistics(participantToAssign));
               availableNonLeaders = availableNonLeaders.filter(p => p.id !== participantToAssign.id);
               assignedThisIteration = true;
             }
@@ -221,20 +140,21 @@ const GroupGenerator: React.FC = () => {
         }
       }
 
-      roundGroups.forEach(group => {
-        group.participants = group.participants.map(participant => {
-          return {
-            ...participant,
-            statistics: {
-              repeatedGroupmateCount: calculateRepeatedGroupmateCount(group, participant, pastGroupmates),
-              unmetTargetAgeGroupmateCount: calculateUnmetTargetAgeGroupmateCount(group, participant, targetAgeRanges),
-            }
-          }}
-        )
-      })
+      // Calculate statistics for each participant for the current round's groups
+      const roundGroupsWithStatistics = roundGroups.map(group => ({
+        ...group,
+        participants: group.participants.map(participant => ({
+          ...participant,
+          statistics: {
+            ...participant.statistics,
+            repeatedGroupmateCount: calculateRepeatedGroupmateCount(group, participant, pastGroupmates),
+            unmetTargetAgeGroupmateCount: calculateUnmetTargetAgeGroupmateCount(group, participant, targetAgeRanges),
+          }
+        }))
+      }))
 
-      // Update participant pairs for the next round
-      roundGroups.forEach(group => {
+      // Update list of groupmates who already met eachother
+      roundGroupsWithStatistics.forEach(group => {
         group.participants.forEach(participant => {
           if (!pastGroupmates[participant.id]) {
             pastGroupmates[participant.id] = new Set();
@@ -247,12 +167,11 @@ const GroupGenerator: React.FC = () => {
         });
       });
 
+      // Calculate statistics for each group for the current round
+      const totalMaleCount = allParticipants.filter(p => maleValues.includes(p.gender)).length;
+      const totalFemaleCount = allParticipants.filter(p => femaleValues.includes(p.gender)).length;
 
-      // Calculate statistics for each group in the current round
-      const totalMaleCount = processedData.filter(p => maleValues.includes(p.gender)).length;
-      const totalFemaleCount = processedData.filter(p => femaleValues.includes(p.gender)).length;
-
-      roundGroups.forEach(group => {
+      roundGroupsWithStatistics.forEach(group => {
         const genderRatioScore = calculateGenderRatioScore(group, maleValues, femaleValues, totalMaleCount, totalFemaleCount);
         const targetAgeScore = calculateTargetAgeScore(group, targetAgeRanges);
         const groupmateRedundancyScore = calculateGroupmateRedundancyScore(group);
@@ -267,40 +186,33 @@ const GroupGenerator: React.FC = () => {
         };
       });
 
-      newGeneratedGroups.push(roundGroups);
+      nextGeneratedGroups.push(roundGroupsWithStatistics);
     }
 
-    // Calculate the statistics for participants
+    // Calculate accumulated statistics for participants
     const accumulatedUnmetTargetAgeGroupmateCounts:  Record<string, number> = {};
     const accumulatedRepeatedGroupmateCount:  Record<string, number> = {};
-    const groupsWithRedundancy = newGeneratedGroups.map((round) => {
+    const nextGeneratedGroupsWithStatistics = nextGeneratedGroups.map((round) => {
       return round.map(group => {
         const participantsWithRedundancy = group.participants.map(participant => {
 
-          accumulatedRepeatedGroupmateCount[participant.id] = (accumulatedRepeatedGroupmateCount[participant.id] || 0) + (participant?.statistics?.repeatedGroupmateCount || 0);
+          accumulatedRepeatedGroupmateCount[participant.id] = (accumulatedRepeatedGroupmateCount[participant.id]) + participant.statistics.repeatedGroupmateCount;
           if (groupSettings.splitByTargetAge) {
-            accumulatedUnmetTargetAgeGroupmateCounts[participant.id] = (accumulatedUnmetTargetAgeGroupmateCounts[participant.id] || 0) + (participant?.statistics?.unmetTargetAgeGroupmateCount || 0);
+            accumulatedUnmetTargetAgeGroupmateCounts[participant.id] = (accumulatedUnmetTargetAgeGroupmateCounts[participant.id]) + participant?.statistics?.unmetTargetAgeGroupmateCount;
           }
 
-          return { ...participant, statistics: { repeatedGroupmateCount: accumulatedRepeatedGroupmateCount[participant.id], unmetTargetAgeGroupmateCount: accumulatedUnmetTargetAgeGroupmateCounts[participant.id] } };
+          return { ...participant, statistics: {
+            ...participant.statistics,
+            accumulatedRepeatedGroupmateCount: accumulatedRepeatedGroupmateCount[participant.id],
+            accumulatedUnmetTargetAgeGroupmateCounts: accumulatedUnmetTargetAgeGroupmateCounts[participant.id],
+          }};
         });
 
-        // Update pastGroupmates for all participants in the current group
-        participantsWithRedundancy.forEach(participant => {
-          if (!pastGroupmates[participant.id]) {
-            pastGroupmates[participant.id] = new Set();
-          }
-          group.participants.forEach(groupmate => {
-            if (participant.id !== groupmate.id) {
-              pastGroupmates[participant.id].add(groupmate.id);
-            }
-          });
-        });
         return { ...group, participants: participantsWithRedundancy };
       });
     });
 
-    setGeneratedGroups(groupsWithRedundancy);
+    setGeneratedGroups(nextGeneratedGroupsWithStatistics);
   };
 
   const handleDownload = () => {

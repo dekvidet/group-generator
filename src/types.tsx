@@ -1,8 +1,18 @@
-export interface Round extends Array<Group> {}
+export interface Participant {
+  id: string;
+  gender: string;
+  age: string;
+  isGroupLeader: boolean;
+  targetAge?: string;
+  [key: string]: any; // Allow for arbitrary additional properties that come from CSV columns
+}
+
+
+export type Round = Array<Group>
 
 export interface Group {
   id: number;
-  participants: Participant[];
+  participants: ParticipantWithStatistics[];
   statistics?: Statistics;
 }
 
@@ -13,17 +23,13 @@ export interface Statistics {
   totalScore: number;
 }
 
-export interface Participant {
-  id: string;
-  gender: string;
-  age: string;
-  isGroupLeader: boolean;
-  targetAge?: string;
-  statistics?: {
-    repeatedGroupmateCount?: number;
-    unmetTargetAgeGroupmateCount?: number;
+export interface ParticipantWithStatistics extends Participant {
+  statistics: {
+    repeatedGroupmateCount: number;
+    unmetTargetAgeGroupmateCount: number;
+    accumulatedRepeatedGroupmateCount: number;
+    accumulatedUnmetTargetAgeGroupmateCounts: number;
   };
-  [key: string]: any; // Allow for arbitrary additional properties that come from CSV columns
 }
 
 export interface TargetAgeRange {

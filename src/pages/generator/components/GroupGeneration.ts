@@ -1,5 +1,93 @@
 import type { Group, Participant, TargetAgeRange } from "../../../types";
 
+export function getBestParticipant(
+  currentGroup: Group,
+  remainingNonLeaders: Participant[],
+  balanceGenders: boolean,
+  splitByTargetAge: boolean,
+  shufflePolicy: string,
+  maleValues: string[],
+  femaleValues: string[],
+  pastGroupmates: Record<string, Set<string>>,
+  groupSize: number,
+  targetAgeRanges: { from: string; to: string; name: string }[],
+): Participant | null {
+  if (remainingNonLeaders.length === 0) return null;
+
+  let candidates = [...remainingNonLeaders];
+
+  if (splitByTargetAge) {
+    const currentGroupAverageAge = getAverageAge(currentGroup);
+    const suitableCandidates = candidates.filter((p: Participant) => {
+      const targetAgeRange = targetAgeRanges.find(range => range.name === p.targetAge);
+      if (targetAgeRange) {
+        const minAge = parseInt(targetAgeRange.from);
+        const maxAge = parseInt(targetAgeRange.to);
+        return currentGroupAverageAge >= minAge && currentGroupAverageAge <= maxAge;
+      }
+      return false;
+    });
+    if (suitableCandidates.length > 0) {
+      candidates = suitableCandidates;
+    }
+  }
+
+  if (balanceGenders) {
+    const currentMaleCount = currentGroup.participants.filter((p: Participant) => maleValues.includes(p.gender)).length;
+    const currentFemaleCount = currentGroup.participants.filter((p: Participant) => femaleValues.includes(p.gender)).length;
+
+    const idealMaleCount = Math.ceil(groupSize / 2);
+    const idealFemaleCount = Math.floor(groupSize / 2);
+
+    let preferredGender: string | null = null;
+    if (currentMaleCount < idealMaleCount && currentFemaleCount < idealFemaleCount) {
+      const malesInRemaining = candidates.filter((p: Participant) => maleValues.includes(p.gender)).length;
+      const femalesInRemaining = candidates.filter((p: Participant) => femaleValues.includes(p.gender)).length;
+      if (malesInRemaining > 0 && femalesInRemaining > 0) {
+        preferredGender = (malesInRemaining <= femalesInRemaining) ? 'male' : 'female';
+      } else if (malesInRemaining > 0) {
+        preferredGender = 'male';
+      } else if (femalesInRemaining > 0) {
+        preferredGender = 'female';
+      }
+    } else if (currentMaleCount < idealMaleCount) {
+      preferredGender = 'male';
+    } else if (currentFemaleCount < idealFemaleCount) {
+      preferredGender = 'female';
+    }
+
+    if (preferredGender) {
+      const genderCandidates = candidates.filter((p: Participant) =>
+        (preferredGender === 'male' && maleValues.includes(p.gender)) ||
+        (preferredGender === 'female' && femaleValues.includes(p.gender))
+      );
+      if (genderCandidates.length > 0) {
+        candidates = genderCandidates;
+      } else {
+        candidates = remainingNonLeaders;
+      }
+    }
+  }
+
+  if (shufflePolicy === 'unique') {
+    return candidates.sort((a: Participant, b: Participant) => {
+      let aRepeatedGroupmateCount = 0
+      let bRepeatedGroupmateCount = 0
+      for (const groupmember of currentGroup.participants) {
+        if (pastGroupmates[a.id]?.has(groupmember.id)) {
+          ++aRepeatedGroupmateCount
+        }
+        if (pastGroupmates[b.id]?.has(groupmember.id)) {
+          ++bRepeatedGroupmateCount
+        }
+      }
+      return aRepeatedGroupmateCount - bRepeatedGroupmateCount;
+    })[0];
+  } else {
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+};
+
 export function calculateRepeatedGroupmateCount(group: Group, participant: Participant, pastGroupmates: Record<string, Set<string>>) {
   let repeatedGroupmateCount = 0;
   const currentParticipantPastGroupmates = pastGroupmates[participant.id] || new Set();
@@ -39,7 +127,7 @@ export function calculateGroupmateRedundancyScore(group: Group): number {
   }
 
   const totalRepeatedGroupmateCount = group.participants.reduce((totalRepeatedGroupmateCount, participant) => {
-    return totalRepeatedGroupmateCount + (participant?.statistics?.repeatedGroupmateCount || 0);
+    return totalRepeatedGroupmateCount + (participant.statistics?.repeatedGroupmateCount || 0);
   }, 0)
 
   const groupSize = group.participants.length
@@ -98,4 +186,12 @@ export function calculateTargetAgeScore(group: Group, targetAgeRanges: TargetAge
   });
 
   return achievedCount / group.participants.length;
+};
+
+export function getAverageAge (group: Group) {
+  if (group.participants.length === 0) {
+    return 0
+  }
+  const totalAge = group.participants.reduce((sum: number, p: Participant) => sum + parseInt(p.age, 10), 0);
+  return totalAge / group.participants.length;
 };
