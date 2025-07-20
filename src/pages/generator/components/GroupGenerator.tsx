@@ -9,7 +9,7 @@ import type { Group, Participant } from '../../../types';
 import { calculateGenderRatioScore, calculateGroupmateRedundancyScore, calculateRepeatedGroupmateCount, calculateTargetAgeScore, calculateUnmetTargetAgeGroupmateCount } from './GroupGeneration';
 
 const GroupGenerator: React.FC = () => {
-  const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, maleValues, femaleValues, targetAgeRanges, participantPairs, generatedGroups, displayColumns, setDisplayColumns, headers } = useStore();
+  const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, maleValues, femaleValues, targetAgeRanges, generatedGroups, displayColumns, setDisplayColumns, headers } = useStore();
   const { t } = useTranslation();
 
   const handleChange = (field: string, value: any) => {
