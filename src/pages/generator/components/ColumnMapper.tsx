@@ -77,17 +77,17 @@ const ColumnMapper: React.FC = () => {
           data.forEach(row => {
             if (mappedColumns.gender && maleValues.includes(row.gender)) {
               participantRatios.men.all++;
-              if (mappedColumns.isGroupLeader && groupLeaderValues.includes(row.isGroupLeader)) {
+              if (mappedColumns.isGroupLeader && row.isGroupLeader) {
                 participantRatios.men.leaders++;
               }
             } else if (mappedColumns.gender && femaleValues.includes(row.gender)) {
               participantRatios.women.all++;
-              if (mappedColumns.isGroupLeader && groupLeaderValues.includes(row.isGroupLeader)) {
+              if (mappedColumns.isGroupLeader && row.isGroupLeader) {
                 participantRatios.women.leaders++;
               }
             } else {
               participantRatios.unknown.all++;
-              if (mappedColumns.isGroupLeader && groupLeaderValues.includes(row.isGroupLeader)) {
+              if (mappedColumns.isGroupLeader && row.isGroupLeader) {
                 participantRatios.unknown.leaders++;
               }
             }
