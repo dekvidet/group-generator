@@ -11,6 +11,7 @@
     "fields": {
       "id": "ID Column",
       "isGroupLeader": "Group Leader Column",
+      "familyName": "Family Name Column",
       "gender": "Gender Column",
       "age": "Age Column",
       "targetAge": "Target Age Column",
@@ -18,12 +19,14 @@
       "to": "Age Group End Age (years)",
       "value": "Age Group Value",
       "addRange": "Add Age Group",
-      "process": "Process"
+      "process": "Process",
+      "reset": "Reset mapping"
     },
     "fieldValues": {
       "male": "Values indicating males",
       "female": "Values indicating females",
-      "isGroupLeader": "Values indicating group leadership"
+      "isGroupLeader": "Values indicating voluntary group leadership",
+      "willNotLead": "Values indicating unwillingness to lead"
     }
   },
   "csvUploader": {
@@ -33,7 +36,7 @@
       "dragAndDrop": "Drag and drop your CSV file here, or click to select one"
     },
     "buttons": {
-      "reset": "Reset"
+      "remove": "Remove"
     }
   },
   "presentPage": {
@@ -71,11 +74,14 @@
       "header": "Group Generation Settings",
       "downloadXls": "Download XLS",
       "downloadCsv": "Download CSV",
+      "downloadPdf": "Download PDF",
       "generateGroups": "Generate Groups",
+      "resetSettings": "Reset settings",
       "groupLeaderColumn": "Group Leader",
       "roundHeader": "Round {{round}}",
       "excelFileName": "groups.xlsx",
-      "csvFileName": "groups.csv"
+      "csvFileName": "groups.csv",
+      "pdfFileName": "groups.pdf"
     },
     "fields": {
       "groupSize": "Group Size",
@@ -85,6 +91,8 @@
       "balanceGenders": "Balance Genders in Groups",
       "splitByTargetAge": "Assign Groupmates Considering Preferred Age Group",
       "compulsoryGroupLeader": "Select compulsory group leader",
+      "keepSiblingsApart": "Keep participants with the same family name apart",
+      "optimizationSeed": "Reproducible random seed",
       "columnsToDisplay": "Columns to Display"
     },
     "shufflePolicyOptions": {
@@ -97,7 +105,15 @@
       "header": "Generated Groups",
       "round": "Round",
       "perRound": "Per Round",
-      "total": "Total"
+      "total": "Total",
+      "goToGroup": "Go to round {{round}}, group {{group}} members"
+    },
+    "scoreLegend": {
+      "veryGood": "Very good (0.90–1.00)",
+      "good": "Good (0.75–0.89)",
+      "fair": "Fair (0.60–0.74)",
+      "poor": "Poor (0.40–0.59)",
+      "veryPoor": "Very poor (0.00–0.39)"
     },
     "buttons": {
       "showStatistics": "Show Statistics",
@@ -109,10 +125,15 @@
       "unmetTargetAgeGroupmateCount": "Individuals Outside Preferred Age Group",
       "group": "Group",
       "averageAge": "average age",
-      "genderRatioScore": "Gender Ratio Score",
-      "targetAgeScore": "Target Age Score",
-      "groupmateRedundancyScore": "Groupmate Redundancy Score",
-      "totalScore": "Total Score",
+      "genderRatioScore": "Gender Allocation Score",
+      "targetAgeScore": "Age Satisfaction Score",
+      "groupmateRedundancyScore": "New-contact Score",
+      "ageSatisfactionScore": "Age Satisfaction",
+      "uniquePairCoverage": "Unique-pair Coverage",
+      "repeatCost": "Convex Repeat Cost",
+      "worstPairFrequency": "Worst Pair Frequency",
+      "averageExposure": "Average Distinct Contacts",
+      "minimumExposure": "Minimum Distinct Contacts",
       "average": "Average",
       "total": "Total",
       "worst": "Worst"

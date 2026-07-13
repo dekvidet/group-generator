@@ -1,16 +1,33 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../../../store';
-import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, Button, Chip, ListItemText } from '@mui/material';
+import { Alert, Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, Button, Chip, ListItemText } from '@mui/material';
 import * as XLSX from 'xlsx';
 import { useTranslation } from 'react-i18next';
 import Papa from 'papaparse';
 import type { Group, Participant, ParticipantWithStatistics } from '../../../types';
-import { calculateGenderRatioScore, calculateGroupmateRedundancyScore, calculateRepeatedGroupmateCount, calculateTargetAgeScore, calculateUnmetTargetAgeGroupmateCount, getBestParticipant } from './GroupGeneration';
+import { calculateGenderRatioScore, calculateGroupmateRedundancyScore, calculateParticipantAgeSatisfaction, calculateRepeatedGroupmateCount, calculateTargetAgeScore, calculateUnmetTargetAgeGroupmateCount, optimizeGroups, type MeetingCounts, type OptimizationSettings } from './GroupGeneration';
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+  }
+  return window.btoa(binary);
+}
+
+async function fetchFontAsBase64(fileName: string): Promise<string> {
+  const response = await fetch(`${import.meta.env.BASE_URL}fonts/${fileName}`);
+  if (!response.ok) throw new Error(`Could not load PDF font: ${fileName}`);
+  return arrayBufferToBase64(await response.arrayBuffer());
+}
 
 const GroupGenerator: React.FC = () => {
-  const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, maleValues, femaleValues, targetAgeRanges, generatedGroups, displayColumns, setDisplayColumns, headers } = useStore();
+  const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, maleValues, femaleValues, targetAgeRanges, generatedGroups, displayColumns, setDisplayColumns, headers, mappedColumns, resetGroupSettings } = useStore();
   const { t } = useTranslation();
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
   const handleChange = (field: string, value: any) => {
     setGroupSettings({ [field]: value });
@@ -24,199 +41,70 @@ const GroupGenerator: React.FC = () => {
         unmetTargetAgeGroupmateCount: 0,
         accumulatedRepeatedGroupmateCount: 0,
         accumulatedUnmetTargetAgeGroupmateCounts: 0,
+        ageSatisfactionScore: null,
       }
     })
   }
 
   const handleGenerateGroups = () => {
-    const { groupSize, rounds, minLeaders, balanceGenders, splitByTargetAge, shufflePolicy, compulsoryGroupLeader } = groupSettings;
-    const pastGroupmates: Record<string, Set<string>> = {};
-    const allParticipants: Participant[] = processedData
-    const leaders = allParticipants.filter((p: Participant) => p.isGroupLeader);
-    const nonLeaders = allParticipants.filter((p: Participant) => !p.isGroupLeader);
+    setGenerationError(null);
+    try {
+      const allParticipants = processedData as Participant[];
+      const optimized = optimizeGroups(allParticipants, groupSettings as OptimizationSettings, maleValues, femaleValues, targetAgeRanges);
+      const priorMeetings: MeetingCounts = {};
+      const accumulatedUnmet: Record<string, number> = {};
+      const accumulatedRepeated: Record<string, number> = {};
+      const totalMaleCount = allParticipants.filter(participant => maleValues.includes(participant.gender)).length;
+      const totalFemaleCount = allParticipants.filter(participant => femaleValues.includes(participant.gender)).length;
 
-    // Compulsory group leader logic (global before rounds)
-    if (compulsoryGroupLeader) {
-      const numGroups = Math.ceil(allParticipants.length / groupSize);
-      const requiredLeadersCount = numGroups * minLeaders;
+      const rounds = optimized.rounds.map((optimizedRound) => {
+        const groups: Group[] = optimizedRound.map((participants, groupIndex) => ({
+          id: groupIndex + 1,
+          participants: participants.map(addStatistics),
+        }));
 
-      if (leaders.length < requiredLeadersCount) {
-        const needed = requiredLeadersCount - leaders.length;
-        for (let k = 0; k < needed; k++) {
-          if (nonLeaders.length > 0) {
-            const randomIndex = Math.floor(Math.random() * nonLeaders.length);
-            const selectedLeader = { ...nonLeaders[randomIndex], isGroupLeader: true };
-            leaders.push(selectedLeader);
-            nonLeaders.splice(randomIndex, 1); // Remove from nonLeaders
-          } else {
-            break; // No more non-leaders to promote
-          }
-        }
-      }
-    }
-
-    const nextGeneratedGroups: Group[][] = [];
-
-    for (let i = 0; i < rounds; i++) {
-      const roundGroups: Group[] = [];
-      const numGroups = Math.ceil(allParticipants.length / groupSize);
-
-      // Initialize groups with leaders (fixed to group ID)
-      for (let j = 0; j < numGroups; j++) {
-        roundGroups.push({ id: j + 1, participants: [] });
-      }
-
-      // Distribute leaders based on their initial group ID (if round 0) or fixed assignment
-      if (i === 0) {
-        let leaderIndex = 0;
-        for (let j = 0; j < minLeaders; j++) {
-          for (let k = 0; k < numGroups; k++) {
-            if (leaders[leaderIndex]) {
-              roundGroups[k].participants.push(addStatistics(leaders[leaderIndex]));
-              leaderIndex++;
-            }
-          }
-        }
-        while (leaderIndex < leaders.length) {
-          for (let k = 0; k < numGroups; k++) {
-            if (leaders[leaderIndex]) {
-              roundGroups[k].participants.push(addStatistics(leaders[leaderIndex]));
-              leaderIndex++;
-            }
-          }
-        }
-      } else {
-        // For subsequent rounds, leaders stay in the same group ID
-        // This assumes leaders were assigned to groups in round 0 and their group ID is stored
-        // For now, I'll re-distribute them based on the initial logic for simplicity, but a more robust solution
-        // would store their assigned group ID from round 0.
-        let leaderIndex = 0;
-        for (let j = 0; j < minLeaders; j++) {
-          for (let k = 0; k < numGroups; k++) {
-            if (leaders[leaderIndex]) {
-              roundGroups[k].participants.push(addStatistics(leaders[leaderIndex]));
-              leaderIndex++;
-            }
-          }
-        }
-        while (leaderIndex < leaders.length) {
-          for (let k = 0; k < numGroups; k++) {
-            if (leaders[leaderIndex]) {
-              roundGroups[k].participants.push(addStatistics(leaders[leaderIndex]));
-              leaderIndex++;
-            }
-          }
-        }
-      }
-
-      let availableNonLeaders = [...nonLeaders];
-
-      while (availableNonLeaders.length > 0) {
-        let assignedThisIteration = false;
-        for (const group of roundGroups) {
-          if (group.participants.length < groupSize) {
-            const totalMaleCount = allParticipants.filter(p => maleValues.includes(p.gender)).length;
-            const totalFemaleCount = allParticipants.filter(p => femaleValues.includes(p.gender)).length;
-            const maleRatio = totalMaleCount / (totalMaleCount + totalFemaleCount);
-            const participantToAssign = getBestParticipant(
-              group,
-              availableNonLeaders,
-              balanceGenders,
-              splitByTargetAge,
-              shufflePolicy,
-              maleValues,
-              femaleValues,
-              pastGroupmates,
-              groupSize,
-              targetAgeRanges,
-              maleRatio
-            );
-
-            if (participantToAssign) {
-              group.participants.push(addStatistics(participantToAssign));
-              availableNonLeaders = availableNonLeaders.filter(p => p.id !== participantToAssign.id);
-              assignedThisIteration = true;
-            }
-          }
-        }
-        if (!assignedThisIteration && availableNonLeaders.length > 0) {
-          break;
-        }
-      }
-
-      // Calculate statistics for each participant for the current round's groups
-      const roundGroupsWithStatistics = roundGroups.map(group => ({
-        ...group,
-        participants: group.participants.map(participant => ({
-          ...participant,
-          statistics: {
-            ...participant.statistics,
-            repeatedGroupmateCount: calculateRepeatedGroupmateCount(group, participant, pastGroupmates),
-            unmetTargetAgeGroupmateCount: calculateUnmetTargetAgeGroupmateCount(group, participant, targetAgeRanges),
-          }
-        }))
-      }))
-
-      // Update list of groupmates who already met eachother
-      roundGroupsWithStatistics.forEach(group => {
-        group.participants.forEach(participant => {
-          if (!pastGroupmates[participant.id]) {
-            pastGroupmates[participant.id] = new Set();
-          }
-          group.participants.forEach(groupmate => {
-            if (participant.id !== groupmate.id) {
-              pastGroupmates[participant.id].add(groupmate.id);
-            }
+        for (const group of groups) {
+          group.participants = group.participants.map(participant => {
+            const repeatedGroupmateCount = calculateRepeatedGroupmateCount(group, participant, priorMeetings);
+            const unmetTargetAgeGroupmateCount = calculateUnmetTargetAgeGroupmateCount(group, participant, targetAgeRanges);
+            accumulatedRepeated[participant.id] = (accumulatedRepeated[participant.id] ?? 0) + repeatedGroupmateCount;
+            accumulatedUnmet[participant.id] = (accumulatedUnmet[participant.id] ?? 0) + unmetTargetAgeGroupmateCount;
+            return {
+              ...participant,
+              statistics: {
+                repeatedGroupmateCount,
+                unmetTargetAgeGroupmateCount,
+                accumulatedRepeatedGroupmateCount: accumulatedRepeated[participant.id],
+                accumulatedUnmetTargetAgeGroupmateCounts: accumulatedUnmet[participant.id],
+                ageSatisfactionScore: calculateParticipantAgeSatisfaction(participant, group, targetAgeRanges),
+              },
+            };
           });
-        });
-      });
+          group.statistics = {
+            genderRatioScore: calculateGenderRatioScore(group, maleValues, femaleValues, totalMaleCount, totalFemaleCount),
+            targetAgeScore: calculateTargetAgeScore(group, targetAgeRanges),
+            groupmateRedundancyScore: calculateGroupmateRedundancyScore(group, priorMeetings),
+          };
+        }
 
-      // Calculate statistics for each group for the current round
-      const totalMaleCount = allParticipants.filter(p => maleValues.includes(p.gender)).length;
-      const totalFemaleCount = allParticipants.filter(p => femaleValues.includes(p.gender)).length;
-
-      roundGroupsWithStatistics.forEach(group => {
-        const genderRatioScore = calculateGenderRatioScore(group, maleValues, femaleValues, totalMaleCount, totalFemaleCount);
-        const targetAgeScore = calculateTargetAgeScore(group, targetAgeRanges);
-        const groupmateRedundancyScore = calculateGroupmateRedundancyScore(group);
-
-        const totalScore = (genderRatioScore + targetAgeScore + groupmateRedundancyScore) / 3;
-
-        group.statistics = {
-          genderRatioScore,
-          targetAgeScore,
-          groupmateRedundancyScore,
-          totalScore,
-        };
-      });
-
-      nextGeneratedGroups.push(roundGroupsWithStatistics);
-    }
-
-    // Calculate accumulated statistics for participants
-    const accumulatedUnmetTargetAgeGroupmateCounts:  Record<string, number> = {};
-    const accumulatedRepeatedGroupmateCount:  Record<string, number> = {};
-    const nextGeneratedGroupsWithStatistics = nextGeneratedGroups.map((round) => {
-      return round.map(group => {
-        const participantsWithStatistics = group.participants.map(participant => {
-
-          accumulatedRepeatedGroupmateCount[participant.id] = (accumulatedRepeatedGroupmateCount[participant.id] || 0) + participant.statistics.repeatedGroupmateCount;
-          if (groupSettings.splitByTargetAge) {
-            accumulatedUnmetTargetAgeGroupmateCounts[participant.id] = (accumulatedUnmetTargetAgeGroupmateCounts[participant.id] || 0) + participant?.statistics?.unmetTargetAgeGroupmateCount;
+        for (const group of groups) {
+          for (const participant of group.participants) {
+            priorMeetings[participant.id] ??= new Map();
+            for (const groupmate of group.participants) {
+              if (participant.id !== groupmate.id) {
+                const previousCount = priorMeetings[participant.id].get(groupmate.id) ?? 0;
+                priorMeetings[participant.id].set(groupmate.id, previousCount + 1);
+              }
+            }
           }
-
-          return { ...participant, statistics: {
-            ...participant.statistics,
-            accumulatedRepeatedGroupmateCount: accumulatedRepeatedGroupmateCount[participant.id],
-            accumulatedUnmetTargetAgeGroupmateCounts: accumulatedUnmetTargetAgeGroupmateCounts[participant.id],
-          }};
-        });
-
-        return { ...group, participants: participantsWithStatistics };
+        }
+        return groups;
       });
-    });
-
-    setGeneratedGroups(nextGeneratedGroupsWithStatistics);
+      setGeneratedGroups(rounds);
+    } catch (error) {
+      setGeneratedGroups([]);
+      setGenerationError(error instanceof Error ? error.message : String(error));
+    }
   };
 
   const handleDownload = () => {
@@ -264,7 +152,7 @@ const GroupGenerator: React.FC = () => {
     XLSX.writeFile(wb, t('groupGenerator.texts.excelFileName'));
   };
 
-  const prepareDataForDownload = () => {
+  const prepareDataForDownload = (sortByName = false) => {
     const ws_data: any[][] = [[]];
     displayColumns.forEach(col => ws_data[0].push(col));
     ws_data[0].push(t('groupGenerator.texts.groupLeaderColumn'));
@@ -291,7 +179,30 @@ const GroupGenerator: React.FC = () => {
       });
     });
 
-    allParticipants.forEach((value, _key) => {
+    const participantRows = [...allParticipants.values()];
+    if (sortByName) {
+      const familyNameColumn = mappedColumns.familyName;
+      const otherNameColumns = displayColumns.filter(column => {
+        if (column === familyNameColumn) return false;
+        const normalized = column.toLocaleLowerCase('hu');
+        return /(name|név|kereszt|first|given|utó)/u.test(normalized);
+      });
+      const secondaryColumns = otherNameColumns.length > 0
+        ? otherNameColumns
+        : displayColumns.filter(column => column !== familyNameColumn).slice(0, 1);
+      const sortText = (value: { data: Participant }, columns: string[]) =>
+        columns.map(column => String(value.data[column] ?? '')).join(' ').trim();
+
+      participantRows.sort((first, second) => {
+        const firstFamilyName = String(first.data.familyName ?? (familyNameColumn ? first.data[familyNameColumn] : '') ?? '');
+        const secondFamilyName = String(second.data.familyName ?? (familyNameColumn ? second.data[familyNameColumn] : '') ?? '');
+        const familyComparison = firstFamilyName.localeCompare(secondFamilyName, 'hu', { sensitivity: 'base', numeric: true });
+        if (familyComparison !== 0) return familyComparison;
+        return sortText(first, secondaryColumns).localeCompare(sortText(second, secondaryColumns), 'hu', { sensitivity: 'base', numeric: true });
+      });
+    }
+
+    participantRows.forEach((value) => {
       const row: any[] = [];
       displayColumns.forEach(col => row.push(value.data[col]));
       row.push(value.isLeader);
@@ -320,13 +231,72 @@ const GroupGenerator: React.FC = () => {
     }
   };
 
+  const handleDownloadPdf = async () => {
+    setGenerationError(null);
+    try {
+      const [{ jsPDF }, { default: autoTable }, regularFont, boldFont] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+        fetchFontAsBase64('LiberationSans-Regular.ttf'),
+        fetchFontAsBase64('LiberationSans-Bold.ttf'),
+      ]);
+      const data = prepareDataForDownload(true);
+      const document = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4', putOnlyUsedFonts: true });
+      document.addFileToVFS('LiberationSans-Regular.ttf', regularFont);
+      document.addFont('LiberationSans-Regular.ttf', 'LiberationSans', 'normal');
+      document.addFileToVFS('LiberationSans-Bold.ttf', boldFont);
+      document.addFont('LiberationSans-Bold.ttf', 'LiberationSans', 'bold');
+      document.setFont('LiberationSans', 'normal');
+
+      autoTable(document, {
+        head: [data[0].map(value => String(value ?? ''))],
+        body: data.slice(1).map(row => row.map(value => String(value ?? ''))),
+        theme: 'grid',
+        styles: {
+          font: 'LiberationSans',
+          fontStyle: 'normal',
+          fontSize: 8,
+          cellPadding: 2,
+          overflow: 'linebreak',
+          valign: 'middle',
+          lineColor: [255, 255, 255],
+          lineWidth: 0.6,
+          minCellHeight: 8,
+        },
+        headStyles: {
+          fillColor: [25, 118, 210],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          halign: 'center',
+          minCellHeight: 10,
+        },
+        bodyStyles: { fillColor: [245, 247, 250], textColor: [40, 40, 40] },
+        alternateRowStyles: { fillColor: [226, 232, 240] },
+        margin: { top: 10, right: 10, bottom: 10, left: 10 },
+        horizontalPageBreak: true,
+        horizontalPageBreakRepeat: displayColumns.length > 1 ? [0, 1] : 0,
+        didParseCell: ({ section, column, cell }) => {
+          if (section === 'body') {
+            cell.styles.halign = column.index < displayColumns.length ? 'left' : 'center';
+          }
+        },
+      });
+      document.save(t('groupGenerator.texts.pdfFileName'));
+    } catch (error) {
+      setGenerationError(error instanceof Error ? error.message : String(error));
+    }
+  };
+
   if (processedData.length === 0) {
     return null;
   }
 
   return (
     <Box sx={{ marginTop: '20px' }}>
-      <Typography variant="h6">{t('groupGenerator.texts.header')}</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+        <Typography variant="h6">{t('groupGenerator.texts.header')}</Typography>
+        <Button variant="outlined" onClick={() => { resetGroupSettings(); setGenerationError(null); }}>{t('groupGenerator.texts.resetSettings')}</Button>
+      </Box>
       <TextField label={t('groupGenerator.fields.groupSize')} type="number" fullWidth sx={{ marginTop: '10px' }} value={groupSettings.groupSize} onChange={(e) => handleChange('groupSize', parseInt(e.target.value))} />
       <TextField label={t('groupGenerator.fields.minLeaders')} type="number" fullWidth sx={{ marginTop: '10px' }} value={groupSettings.minLeaders} onChange={(e) => handleChange('minLeaders', parseInt(e.target.value))} />
       <TextField label={t('groupGenerator.fields.rounds')} type="number" fullWidth sx={{ marginTop: '10px' }} value={groupSettings.rounds} onChange={(e) => handleChange('rounds', parseInt(e.target.value))} />
@@ -340,6 +310,8 @@ const GroupGenerator: React.FC = () => {
       <FormControlLabel control={<Checkbox checked={groupSettings.balanceGenders} onChange={(e) => handleChange('balanceGenders', e.target.checked)} />} label={t('groupGenerator.fields.balanceGenders')} />
       <FormControlLabel control={<Checkbox checked={groupSettings.splitByTargetAge} onChange={(e) => handleChange('splitByTargetAge', e.target.checked)} />} label={t('groupGenerator.fields.splitByTargetAge')} />
       <FormControlLabel control={<Checkbox checked={groupSettings.compulsoryGroupLeader} onChange={(e) => handleChange('compulsoryGroupLeader', e.target.checked)} />} label={t('groupGenerator.fields.compulsoryGroupLeader')} />
+      <FormControlLabel control={<Checkbox checked={groupSettings.keepSiblingsApart} disabled={!mappedColumns.familyName} onChange={(e) => handleChange('keepSiblingsApart', e.target.checked)} />} label={t('groupGenerator.fields.keepSiblingsApart')} />
+      <TextField label={t('groupGenerator.fields.optimizationSeed')} type="number" fullWidth sx={{ marginTop: '10px' }} value={groupSettings.optimizationSeed} onChange={(e) => handleChange('optimizationSeed', Number.parseInt(e.target.value, 10))} />
       <FormControl fullWidth sx={{ marginTop: '10px' }}>
         <InputLabel id="columns-to-display-label">{t('groupGenerator.fields.columnsToDisplay')}</InputLabel>
         <Select
@@ -368,10 +340,11 @@ const GroupGenerator: React.FC = () => {
         <Button variant="contained" onClick={handleGenerateGroups}>{t('groupGenerator.texts.generateGroups')}</Button>
         <Button variant="contained" onClick={handleDownload} disabled={generatedGroups.length === 0}>{t('groupGenerator.texts.downloadXls')}</Button>
         <Button variant="contained" onClick={handleDownloadCsv} disabled={generatedGroups.length === 0}>{t('groupGenerator.texts.downloadCsv')}</Button>
+        <Button variant="contained" onClick={handleDownloadPdf} disabled={generatedGroups.length === 0}>{t('groupGenerator.texts.downloadPdf')}</Button>
       </Box>
+      {generationError && <Alert severity="error" sx={{ marginTop: '10px' }}>{generationError}</Alert>}
     </Box>
   );
 };
 
 export default GroupGenerator;
-

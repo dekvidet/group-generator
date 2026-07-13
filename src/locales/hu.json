@@ -11,6 +11,7 @@
     "fields": {
       "id": "ID / Azonosító oszlopa",
       "isGroupLeader": "Csoportvezetőség oszlopa",
+      "familyName": "Családnév oszlopa",
       "gender": "Nem oszlopa",
       "age": "Életkor oszlopa",
       "targetAge": "Preferált korosztály oszlopa",
@@ -18,12 +19,14 @@
       "to": "Korosztályi befejező kor (év)",
       "value": "Korosztályt jelölő érték",
       "addRange": "Korosztály hozzáadása",
-      "process": "Feldolgozás"
+      "process": "Feldolgozás",
+      "reset": "Hozzárendelések visszaállítása"
     },
     "fieldValues": {
       "male": "Férfi nemet jelölő értékek",
       "female": "Női nemet jelölő értékek",
-      "isGroupLeader": "Csapatvezetőséget jelölő értékek"
+      "isGroupLeader": "Önkéntes csapatvezetőséget jelölő értékek",
+      "willNotLead": "Csapatvezetést elutasító értékek"
     }
   },
   "csvUploader": {
@@ -33,7 +36,7 @@
       "dragAndDrop": "Húzd ide a CSV fájlt, vagy kattints a kiválasztáshoz"
     },
     "buttons": {
-      "reset": "Visszaállítás"
+      "remove": "Eltávolítás"
     }
   },
   "presentPage": {
@@ -71,11 +74,14 @@
       "header": "Csoportgenerálási beállítások",
       "downloadXls": "XLS letöltése",
       "downloadCsv": "CSV letöltése",
+      "downloadPdf": "PDF letöltése",
       "generateGroups": "Csoportok generálása",
+      "resetSettings": "Beállítások visszaállítása",
       "groupLeaderColumn": "Csoportvezető",
       "roundHeader": "{{round}}. kör",
       "excelFileName": "csoportok.xlsx",
-      "csvFileName": "csoportok.csv"
+      "csvFileName": "csoportok.csv",
+      "pdfFileName": "csoportok.pdf"
     },
     "fields": {
       "groupSize": "Csoportok mérete",
@@ -85,6 +91,8 @@
       "balanceGenders": "Nemek kiegyensúlyozása a csapatokban",
       "splitByTargetAge": "Csapattársak sorsolása preferált korosztály figyelembe vételével",
       "compulsoryGroupLeader": "Csoportvezető kijelölése ha nincs elég",
+      "keepSiblingsApart": "Azonos családnevű résztvevők külön csoportba helyezése",
+      "optimizationSeed": "Reprodukálható véletlen mag",
       "columnsToDisplay": "Megjelenítendő oszlopok"
     },
     "shufflePolicyOptions": {
@@ -97,7 +105,15 @@
       "header": "Generált csoportok",
       "round": "Kör",
       "perRound": "Körönként",
-      "total": "Összesen"
+      "total": "Összesen",
+      "goToGroup": "Ugrás a(z) {{round}}. kör {{group}}. csoportjának tagjaihoz"
+    },
+    "scoreLegend": {
+      "veryGood": "Nagyon jó (0,90–1,00)",
+      "good": "Jó (0,75–0,89)",
+      "fair": "Közepes (0,60–0,74)",
+      "poor": "Gyenge (0,40–0,59)",
+      "veryPoor": "Nagyon gyenge (0,00–0,39)"
     },
     "buttons": {
       "showStatistics": "Statisztika mutatása",
@@ -109,10 +125,15 @@
       "unmetTargetAgeGroupmateCount": "Preferált korosztályon kívüli személyek",
       "group": "Csoport",
       "averageAge": "átlagos életkor",
-      "genderRatioScore": "Nem arány pontszám",
-      "targetAgeScore": "Célkor pontszám",
-      "groupmateRedundancyScore": "Csapattárs ismétlődés pontszám",
-      "totalScore": "Összes pontszám",
+      "genderRatioScore": "Nemelosztási pontszám",
+      "targetAgeScore": "Korpreferencia-elégedettségi pontszám",
+      "groupmateRedundancyScore": "Új kapcsolatok pontszáma",
+      "ageSatisfactionScore": "Korpreferencia-elégedettség",
+      "uniquePairCoverage": "Egyedi párok lefedettsége",
+      "repeatCost": "Konvex ismétlési költség",
+      "worstPairFrequency": "Leggyakoribb pár gyakorisága",
+      "averageExposure": "Átlagos különböző kapcsolatok",
+      "minimumExposure": "Minimum különböző kapcsolatok",
       "average": "Átlag",
       "total": "Összesen",
       "worst": "Legrosszabb"

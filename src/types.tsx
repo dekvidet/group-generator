@@ -3,6 +3,8 @@ export interface Participant {
   gender: string;
   age: string;
   isGroupLeader: boolean;
+  leaderPreference: 'voluntary' | 'indifferent' | 'no';
+  familyName?: string;
   targetAge?: string;
   [key: string]: any; // Allow for arbitrary additional properties that come from CSV columns
 }
@@ -20,7 +22,6 @@ export interface Statistics {
   genderRatioScore: number;
   targetAgeScore: number;
   groupmateRedundancyScore: number;
-  totalScore: number;
 }
 
 export interface ParticipantWithStatistics extends Participant {
@@ -29,6 +30,7 @@ export interface ParticipantWithStatistics extends Participant {
     unmetTargetAgeGroupmateCount: number;
     accumulatedRepeatedGroupmateCount: number;
     accumulatedUnmetTargetAgeGroupmateCounts: number;
+    ageSatisfactionScore: number | null;
   };
 }
 

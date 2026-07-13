@@ -7,16 +7,12 @@ import { useTranslation } from 'react-i18next';
 interface DropzoneProps {
   onDrop: (acceptedFiles: File[]) => void;
   file: File | undefined;
-  onReset: () => void;
+  onRemove: () => void;
 }
 
-const Dropzone: React.FC<DropzoneProps> = ({ onDrop, file, onReset }) => {
+const Dropzone: React.FC<DropzoneProps> = ({ onDrop, file, onRemove }) => {
   const { t } = useTranslation();
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'text/csv': ['.csv'] } });
-
-  const handleReset = () => {
-    onReset();
-  };
 
   if (file) {
     return (
@@ -31,8 +27,8 @@ const Dropzone: React.FC<DropzoneProps> = ({ onDrop, file, onReset }) => {
         }}
       >
         <Typography variant="h6">{file.name}</Typography>
-        <Button variant="contained" color="primary" onClick={handleReset} sx={{ marginTop: '10px' }}>
-          {t('csvUploader.buttons.reset')}
+        <Button variant="contained" color="primary" onClick={onRemove} sx={{ marginTop: '10px' }}>
+          {t('csvUploader.buttons.remove')}
         </Button>
       </Paper>
     );

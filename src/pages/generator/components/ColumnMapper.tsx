@@ -6,7 +6,7 @@ import Papa from 'papaparse';
 import { useTranslation } from 'react-i18next';
 
 const ColumnMapper: React.FC = () => {
-  const { headers, uniqueValues, mappedColumns, setMappedColumns, setProcessedData, setParticipantRatios, setAgeGroups, generatorFile, setMaleValues, setFemaleValues, setGroupLeaderValues, setTargetAgeRanges, maleValues, femaleValues, groupLeaderValues, targetAgeRanges, setGeneratedIdCount, setDuplicateRowCount } = useStore();
+  const { headers, uniqueValues, mappedColumns, setMappedColumns, setProcessedData, setParticipantRatios, setAgeGroups, generatorFile, setMaleValues, setFemaleValues, setGroupLeaderValues, setGroupLeaderNoValues, setTargetAgeRanges, maleValues, femaleValues, groupLeaderValues, groupLeaderNoValues, targetAgeRanges, setGeneratedIdCount, setDuplicateRowCount, resetMapSettings } = useStore();
   const { t } = useTranslation();
 
   const handleChange = (field: string, value: string | null) => {
@@ -46,6 +46,9 @@ const ColumnMapper: React.FC = () => {
                 if (csvHeader) {
                   if (field === 'isGroupLeader') {
                     newRow[field] = groupLeaderValues.includes(row[csvHeader]);
+                    newRow.leaderPreference = newRow[field]
+                      ? 'voluntary'
+                      : groupLeaderNoValues.includes(row[csvHeader]) ? 'no' : 'indifferent';
                   } else {
                     newRow[field] = row[csvHeader];
                   }
@@ -118,7 +121,10 @@ const ColumnMapper: React.FC = () => {
 
   return (
     <Box sx={{ marginTop: '20px' }}>
-      <Typography variant="h6">{t('mapColumns.texts.header')}</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+        <Typography variant="h6">{t('mapColumns.texts.header')}</Typography>
+        <Button variant="outlined" onClick={resetMapSettings}>{t('mapColumns.fields.reset')}</Button>
+      </Box>
       <Typography variant="body2" sx={{ marginBottom: '20px' }}>{t('mapColumns.texts.subHeader')}</Typography>
       {Object.keys(mappedColumns).filter(field => field !== 'firstName' && field !== 'lastName' && field !== 'email').map(field => (
         <React.Fragment key={field}>
@@ -190,10 +196,29 @@ const ColumnMapper: React.FC = () => {
             <Box sx={{ marginLeft: '20px', marginTop: '10px' }}>
               <FormControl fullWidth>
                 <InputLabel id="group-leader-values-label">{t('mapColumns.fieldValues.isGroupLeader')}</InputLabel>
-                <Select multiple value={groupLeaderValues} onChange={(e) => setGroupLeaderValues(e.target.value as string[])} renderValue={(selected) => (selected as string[]).join(', ')} labelId="group-leader-values-label" label={t('mapColumns.fieldValues.isGroupLeader')}>
+                <Select multiple value={groupLeaderValues} onChange={(e) => {
+                  const values = e.target.value as string[];
+                  setGroupLeaderValues(values);
+                  setGroupLeaderNoValues(groupLeaderNoValues.filter(value => !values.includes(value)));
+                }} renderValue={(selected) => (selected as string[]).join(', ')} labelId="group-leader-values-label" label={t('mapColumns.fieldValues.isGroupLeader')}>
                   {uniqueValues[mappedColumns.isGroupLeader as string]?.map((value: string) => (
-                    <MenuItem key={value} value={value}>
+                    <MenuItem key={value} value={value} disabled={groupLeaderNoValues.includes(value)}>
                       <Checkbox checked={groupLeaderValues.indexOf(value) > -1} />
+                      <ListItemText primary={value} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth sx={{ marginTop: '10px' }}>
+                <InputLabel id="group-leader-no-values-label">{t('mapColumns.fieldValues.willNotLead')}</InputLabel>
+                <Select multiple value={groupLeaderNoValues} onChange={(e) => {
+                  const values = e.target.value as string[];
+                  setGroupLeaderNoValues(values);
+                  setGroupLeaderValues(groupLeaderValues.filter(value => !values.includes(value)));
+                }} renderValue={(selected) => (selected as string[]).join(', ')} labelId="group-leader-no-values-label" label={t('mapColumns.fieldValues.willNotLead')}>
+                  {uniqueValues[mappedColumns.isGroupLeader as string]?.map((value: string) => (
+                    <MenuItem key={value} value={value} disabled={groupLeaderValues.includes(value)}>
+                      <Checkbox checked={groupLeaderNoValues.indexOf(value) > -1} />
                       <ListItemText primary={value} />
                     </MenuItem>
                   ))}
