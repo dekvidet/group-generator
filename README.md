@@ -2,6 +2,8 @@
 
 Group Generator imports participants from CSV, assigns them to groups for one or more rounds, displays assignment statistics, and exports the result to XLSX or CSV.
 
+[![Try Online](https://img.shields.io/badge/Try%20Online-Open%20Group%20Generator-2563eb?style=for-the-badge&logo=github)](https://dekvidet.github.io/group-generator/)
+
 ## Goals
 
 - Groups must never exceed the configured maximum size. When the participant count does not divide evenly, group sizes should be as equal as possible; for example, `5, 5, 4, 4, 4` is preferred over `5, 5, 5, 5, 2`.
@@ -161,6 +163,20 @@ The old equal-weight total score has been removed. It contradicted the required 
 ## Export
 
 XLSX, CSV, and PDF exports contain one row per participant, the selected original columns, an `X` for generated leaders, and the participant's group number in each round. PDF embeds a Unicode font for Hungarian text, sorts rows by mapped family name and then the other displayed name, and uses a blue header with alternating light rows. Its landscape table automatically splits wide or long results across pages.
+
+## Sharing generated results
+
+After groups are generated, **Upload data** sends the same selected-column CSV data to the password-protected upload Worker. The password is used only for that request and is not saved. A successful upload produces a shareable View-page URL and a QR code. The default Worker endpoint is `https://group-generator-upload.totymedli.workers.dev`; deployments can override it with the `VITE_UPLOAD_WORKER_URL` build variable.
+
+Shared links use this form:
+
+```text
+https://dekvidet.github.io/group-generator/#/view?file=<encoded-public-csv-url>
+```
+
+The View page fetches the public CSV, displays all exported fields in a searchable table, and sorts by any column when its header is selected. Without a `file` parameter, it accepts a public CSV address or a local CSV through drag and drop.
+
+The upload Worker must allow `PUT` requests from `https://dekvidet.github.io` with the `Authorization` and `Content-Type` headers. The public R2 domain must also allow cross-origin `GET` requests from that origin, otherwise the View page cannot read the uploaded CSV in the browser.
 
 ## License
 

@@ -81,7 +81,8 @@
       "roundHeader": "{{round}}. kör",
       "excelFileName": "csoportok.xlsx",
       "csvFileName": "csoportok.csv",
-      "pdfFileName": "csoportok.pdf"
+      "pdfFileName": "csoportok.pdf",
+      "uploadData": "Adatok feltöltése"
     },
     "fields": {
       "groupSize": "Csoportok mérete",
@@ -98,6 +99,20 @@
     "shufflePolicyOptions": {
       "unique": "Egyedi",
       "random": "Véletlenszerű"
+    },
+    "upload": {
+      "title": "Generált adatok feltöltése",
+      "description": "Add meg a feltöltési jelszót. Csak a kiválasztott exportoszlopok és a generált csoportbeosztások lesznek közzétéve.",
+      "password": "Feltöltési jelszó",
+      "upload": "Feltöltés",
+      "close": "Bezárás",
+      "success": "Az adatok feltöltve. Oszd meg a hivatkozást, vagy olvasd be a QR-kódot.",
+      "shareUrl": "Megosztható hivatkozás",
+      "copy": "Hivatkozás másolása",
+      "copied": "Másolva",
+      "qrCode": "A megosztott csoporteredmények QR-kódja",
+      "failed": "A feltöltés sikertelen: {{message}}",
+      "invalidResponse": "A feltöltő nem adott vissza nyilvános fájlcímet."
     }
   },
   "groupResults": {
@@ -161,6 +176,20 @@
       "total": "Összesen",
       "unknown": "Ismeretlen",
       "ageGroups": "Korcsoportok"
+    }
+  },
+  "viewPage": {
+    "tab": "Megtekintés",
+    "title": "Generált csoportok megtekintése",
+    "description": "Add meg egy generált CSV-fájl nyilvános címét, vagy válassz egy helyi CSV-fájlt.",
+    "csvAddress": "CSV címe",
+    "load": "Betöltés",
+    "dropCsv": "Húzz ide egy CSV-fájlt, vagy kattints a kiválasztáshoz",
+    "search": "Keresés minden oszlopban",
+    "noResults": "Nincs találat",
+    "errors": {
+      "invalidAddress": "Adj meg egy érvényes HTTP- vagy HTTPS-címet.",
+      "loadFailed": "A CSV nem tölthető be: {{message}}"
     }
   }
 }

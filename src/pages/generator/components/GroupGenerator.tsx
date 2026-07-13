@@ -1,12 +1,15 @@
 
 import React, { useState } from 'react';
 import { useStore } from '../../../store';
-import { Alert, Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, Button, Chip, ListItemText } from '@mui/material';
+import { Alert, Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, Button, Chip, ListItemText, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, CircularProgress } from '@mui/material';
 import * as XLSX from 'xlsx';
 import { useTranslation } from 'react-i18next';
 import Papa from 'papaparse';
+import { QRCodeSVG } from 'qrcode.react';
 import type { Group, Participant, ParticipantWithStatistics } from '../../../types';
 import { calculateGenderRatioScore, calculateGroupmateRedundancyScore, calculateParticipantAgeSatisfaction, calculateRepeatedGroupmateCount, calculateTargetAgeScore, calculateUnmetTargetAgeGroupmateCount, optimizeGroups, type MeetingCounts, type OptimizationSettings } from './GroupGeneration';
+
+const UPLOAD_WORKER_URL = import.meta.env.VITE_UPLOAD_WORKER_URL || 'https://group-generator-upload.totymedli.workers.dev';
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
@@ -28,6 +31,12 @@ const GroupGenerator: React.FC = () => {
   const { groupSettings, setGroupSettings, processedData, setGeneratedGroups, maleValues, femaleValues, targetAgeRanges, generatedGroups, displayColumns, setDisplayColumns, headers, mappedColumns, resetGroupSettings } = useStore();
   const { t } = useTranslation();
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploadPassword, setUploadPassword] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const handleChange = (field: string, value: any) => {
     setGroupSettings({ [field]: value });
@@ -216,6 +225,54 @@ const GroupGenerator: React.FC = () => {
 
   
 
+  const handleOpenUploadDialog = () => {
+    setUploadDialogOpen(true);
+    setUploadPassword('');
+    setUploadError(null);
+    setShareUrl('');
+    setCopied(false);
+  };
+
+  const handleUploadData = async () => {
+    if (!uploadPassword) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const csv = Papa.unparse(prepareDataForDownload());
+      const response = await fetch(UPLOAD_WORKER_URL, {
+        method: 'PUT',
+        headers: {
+          Authorization: 'Bearer ' + uploadPassword,
+          'Content-Type': 'text/csv;charset=utf-8',
+        },
+        body: csv,
+      });
+      const result = await response.json().catch(() => ({})) as { url?: string; error?: string };
+      if (!response.ok) {
+        throw new Error(result.error || response.status + ' ' + response.statusText);
+      }
+      if (!result.url) {
+        throw new Error(t('groupGenerator.upload.invalidResponse'));
+      }
+
+      const viewUrl = new URL(window.location.href);
+      viewUrl.hash = '/view?file=' + encodeURIComponent(result.url);
+      setShareUrl(viewUrl.toString());
+      setUploadPassword('');
+    } catch (error) {
+      setUploadError(t('groupGenerator.upload.failed', {
+        message: error instanceof Error ? error.message : String(error),
+      }));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleCopyShareUrl = async () => {
+    await navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+  };
+
   const handleDownloadCsv = () => {
     const ws_data = prepareDataForDownload();
     const csv = Papa.unparse(ws_data);
@@ -336,13 +393,81 @@ const GroupGenerator: React.FC = () => {
           ))}
         </Select>
       </FormControl>
-      <Box sx={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '20px' }}>
         <Button variant="contained" onClick={handleGenerateGroups}>{t('groupGenerator.texts.generateGroups')}</Button>
         <Button variant="contained" onClick={handleDownload} disabled={generatedGroups.length === 0}>{t('groupGenerator.texts.downloadXls')}</Button>
         <Button variant="contained" onClick={handleDownloadCsv} disabled={generatedGroups.length === 0}>{t('groupGenerator.texts.downloadCsv')}</Button>
         <Button variant="contained" onClick={handleDownloadPdf} disabled={generatedGroups.length === 0}>{t('groupGenerator.texts.downloadPdf')}</Button>
+        <Button variant="contained" onClick={handleOpenUploadDialog} disabled={generatedGroups.length === 0}>{t('groupGenerator.texts.uploadData')}</Button>
       </Box>
       {generationError && <Alert severity="error" sx={{ marginTop: '10px' }}>{generationError}</Alert>}
+      <Dialog
+        open={uploadDialogOpen}
+        onClose={() => !uploading && setUploadDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>{t('groupGenerator.upload.title')}</DialogTitle>
+        <DialogContent>
+          {!shareUrl ? (
+            <>
+              <DialogContentText sx={{ mb: 2 }}>
+                {t('groupGenerator.upload.description')}
+              </DialogContentText>
+              <TextField
+                autoFocus
+                fullWidth
+                type="password"
+                autoComplete="current-password"
+                label={t('groupGenerator.upload.password')}
+                value={uploadPassword}
+                onChange={event => setUploadPassword(event.target.value)}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' && uploadPassword && !uploading) {
+                    event.preventDefault();
+                    handleUploadData();
+                  }
+                }}
+              />
+              {uploadError && <Alert severity="error" sx={{ mt: 2 }}>{uploadError}</Alert>}
+            </>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <DialogContentText>{t('groupGenerator.upload.success')}</DialogContentText>
+              <Box sx={{ bgcolor: '#fff', p: 1, lineHeight: 0 }}>
+                <QRCodeSVG
+                  value={shareUrl}
+                  size={220}
+                  level="M"
+                  includeMargin
+                  title={t('groupGenerator.upload.qrCode')}
+                />
+              </Box>
+              <TextField
+                fullWidth
+                label={t('groupGenerator.upload.shareUrl')}
+                value={shareUrl}
+                slotProps={{ input: { readOnly: true } }}
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setUploadDialogOpen(false)} disabled={uploading}>
+            {t('groupGenerator.upload.close')}
+          </Button>
+          {!shareUrl ? (
+            <Button variant="contained" onClick={handleUploadData} disabled={!uploadPassword || uploading}>
+              {uploading && <CircularProgress size={18} sx={{ mr: 1 }} />}
+              {t('groupGenerator.upload.upload')}
+            </Button>
+          ) : (
+            <Button variant="contained" onClick={handleCopyShareUrl}>
+              {t(copied ? 'groupGenerator.upload.copied' : 'groupGenerator.upload.copy')}
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

@@ -81,7 +81,8 @@
       "roundHeader": "Round {{round}}",
       "excelFileName": "groups.xlsx",
       "csvFileName": "groups.csv",
-      "pdfFileName": "groups.pdf"
+      "pdfFileName": "groups.pdf",
+      "uploadData": "Upload data"
     },
     "fields": {
       "groupSize": "Group Size",
@@ -98,6 +99,20 @@
     "shufflePolicyOptions": {
       "unique": "Unique",
       "random": "Random"
+    },
+    "upload": {
+      "title": "Upload generated data",
+      "description": "Enter the upload password. Only the selected export columns and generated group assignments will be published.",
+      "password": "Upload password",
+      "upload": "Upload",
+      "close": "Close",
+      "success": "The data is uploaded. Share this link or scan the QR code.",
+      "shareUrl": "Shareable URL",
+      "copy": "Copy URL",
+      "copied": "Copied",
+      "qrCode": "QR code for the shared group results",
+      "failed": "Upload failed: {{message}}",
+      "invalidResponse": "The uploader did not return a public file URL."
     }
   },
   "groupResults": {
@@ -161,6 +176,20 @@
       "total": "Total",
       "unknown": "Unknown",
       "ageGroups": "Age Groups"
+    }
+  },
+  "viewPage": {
+    "tab": "View",
+    "title": "View generated groups",
+    "description": "Enter the public address of a generated CSV file, or select a local CSV file.",
+    "csvAddress": "CSV address",
+    "load": "Load",
+    "dropCsv": "Drag and drop a CSV file here, or click to select one",
+    "search": "Search all columns",
+    "noResults": "No matching rows",
+    "errors": {
+      "invalidAddress": "Enter a valid HTTP or HTTPS address.",
+      "loadFailed": "Could not load the CSV: {{message}}"
     }
   }
 }

@@ -3,34 +3,21 @@ import { Container, Typography, Box, Tabs, Tab } from '@mui/material';
 import GeneratorPage from './pages/generator/GeneratorPage';
 import PresentPage from './pages/present/PresentPage';
 import DisplayPage from './pages/display/DisplayPage';
+import ViewPage from './pages/view/ViewPage';
 import { useTranslation } from 'react-i18next';
-import i18n from 'i18next';
-import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import LanguageSelector from './components/LanguageSelector';
 
 const AppContent: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
 
-  const handleLanguageChange = (event: any) => {
-    i18n.changeLanguage(event.target.value);
-  };
-
   return (
     <Container maxWidth="xl" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{ my: 4, width: '100%', position: 'relative' }}>
-        <FormControl sx={{ position: 'absolute', top: 0, right: 0, minWidth: 120 }}>
-          <InputLabel id="language-select-label">Language</InputLabel>
-          <Select
-            labelId="language-select-label"
-            value={i18n.language.substring(0, 2)}
-            label="Language"
-            onChange={handleLanguageChange}
-          >
-            <MenuItem value="en">English</MenuItem>
-            <MenuItem value="hu">Hungarian</MenuItem>
-          </Select>
-        </FormControl>
+        <Box sx={{ position: 'absolute', top: 0, right: 0 }}>
+          <LanguageSelector />
+        </Box>
         <Typography variant="h4" component="h1" gutterBottom>
           {t('app.title')}
         </Typography>
@@ -38,12 +25,14 @@ const AppContent: React.FC = () => {
           <Tabs value={location.pathname}>
             <Tab label="Generator" value="/" to="/" component={Link} />
             <Tab label="Presenter" value="/present" to="/present" component={Link} />
+            <Tab label={t('viewPage.tab')} value="/view" to="/view" component={Link} />
           </Tabs>
         </Box>
         <Routes>
           <Route path="/" element={<GeneratorPage />} />
           <Route path="/present" element={<PresentPage />} />
           <Route path="/display" element={<DisplayPage />} />
+          <Route path="/view" element={<ViewPage />} />
         </Routes>
       </Box>
     </Container>
@@ -65,6 +54,14 @@ const AppRouterContent: React.FC = () => {
     return (
       <Routes>
         <Route path="/display" element={<DisplayPage />} />
+      </Routes>
+    );
+  }
+
+  if (location.pathname === '/view') {
+    return (
+      <Routes>
+        <Route path="/view" element={<ViewPage />} />
       </Routes>
     );
   }
